@@ -124,16 +124,22 @@ void communication_handler(void)
   // todo: try to assemble packet..
   // todo: if successful, queue...
   ptr = (cmd_message_t*)buffer;
-  //g_incoming_command_queue.push(*ptr);
-  
+  g_incoming_command_queue.push(*ptr); // todo: doesn't work...
 }
 
-/*
+
 void command_handler(void)
 {
   cmd_message_t message;
+
+  message = g_incoming_command_queue.pop(); // todo: doesn't work...
+
+  switch (message.cmd)
+  {
+    // todo: implement commands...
+  }
 }
-*/
+
 
 // todo: 
 
