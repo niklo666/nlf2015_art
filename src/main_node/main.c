@@ -12,6 +12,14 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
+
+// TODO: implement signal handlers...
+void sig_handler(int signum)
+{
+    printf("Received signal %d\n", signum);
+}
+
+
 static void skeleton_daemon()
 {
     pid_t pid;
@@ -21,15 +29,24 @@ static void skeleton_daemon()
 
     /* An error occurred */
     if (pid < 0)
-        exit(EXIT_FAILURE);
+    {
+      exit(EXIT_FAILURE);
+    }
+
 
     /* Success: Let the parent terminate */
     if (pid > 0)
-        exit(EXIT_SUCCESS);
+    {
+      exit(EXIT_SUCCESS);
+    }
+
 
     /* On success: The child process becomes session leader */
     if (setsid() < 0)
-        exit(EXIT_FAILURE);
+    {
+      exit(EXIT_FAILURE);
+    }
+
 
     /* Catch, ignore and handle signals */
     //TODO: Implement a working signal handler */
@@ -41,11 +58,15 @@ static void skeleton_daemon()
 
     /* An error occurred */
     if (pid < 0)
-        exit(EXIT_FAILURE);
+    {
+      exit(EXIT_FAILURE);
+    }
 
     /* Success: Let the parent terminate */
     if (pid > 0)
-        exit(EXIT_SUCCESS);
+    {
+      exit(EXIT_SUCCESS);
+    }
 
     /* Set new file permissions */
     umask(0);
@@ -62,12 +83,27 @@ static void skeleton_daemon()
     }
 
     /* Open the log file */
-    openlog ("firstdaemon", LOG_PID, LOG_DAEMON);
+    openlog ("rpi_main_controller", LOG_PID, LOG_DAEMON);
 }
+
+void* command_thread(void*);
+void* worker_thread(void*);
 
 int main()
 {
+    // call the skeletal standard daemon code...
     skeleton_daemon();
+
+    // todo: replace example code...
+    // - open config file for settings like start mode etc etc etc...
+    //   configs:
+    //   camera node ips and ports
+    //   light control serial port configs
+    // - start new thread and open socket and listen for commands...
+    // - start another new thread that:
+    // - open serial port and talk to the teensy light controller...
+    // - depending on mode connect to configured camera ip/ports...
+    // - periodially polls cameras for activity...
 
     while (1)
     {
@@ -83,4 +119,16 @@ int main()
     return EXIT_SUCCESS;
 }
 
+// listens for commands through ip socket...
+// expose the same interface thru use of the daemon as executable!? possible?
+void* command_thread(void* p)
+{
+  return 0;
+}
 
+// periodically polls cameras, handle data and send updates to light controller.
+// also waits for commands from the command thread or signals to be killed.
+void* worker_thread(void* p)
+{
+  return 0;
+}
