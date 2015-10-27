@@ -1,0 +1,24 @@
+PC application to be used for test and development of the light_node application
+
+Connects to the light_node through the same serial port as used in the real case
+by the main node.
+
+In order to be used for development and test the communication protocol needs to
+be adapted.
+
+example commands:
+control light     - set intensity, color/pattern/behaviour to all, individual or
+                  group of lamps...
+adjust intensity  - adjust intensity for individual, group or all lights...
+set intensity     - set intensity for individual, group or all lights...
+set color         - set color for individual, group or all lights...
+get intensity
+get color
+get status
+color change      - (start,) stop, time or speed
+intensity change  - (start,) stop, time or speed
+set global max/stop!?
+
+example structure:
+cmd
+light id
