@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <syslog.h>
+#include <pthread.h>
 
 
 // TODO: implement signal handlers...
@@ -98,6 +99,7 @@ int main()
     // - open config file for settings like start mode etc etc etc...
     //   configs:
     //   camera node ips and ports
+    //   camera node algorithm parameters...
     //   light control serial port configs
     // - start new thread and open socket and listen for commands...
     // - start another new thread that:
