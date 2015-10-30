@@ -83,7 +83,7 @@ static void skeleton_daemon()
     }
 
     /* Open the log file */
-    openlog ("rpi_main_controller", LOG_PID, LOG_DAEMON);
+    openlog("rpi_main_controller", LOG_PID, LOG_DAEMON);
 }
 
 void* command_thread(void*);
@@ -108,12 +108,12 @@ int main()
     while (1)
     {
         //TODO: Insert daemon code here.
-        syslog (LOG_NOTICE, "First daemon started.");
+        syslog(LOG_NOTICE, "First daemon started.");
         sleep (20);
         break;
     }
 
-    syslog (LOG_NOTICE, "First daemon terminated.");
+    syslog(LOG_NOTICE, "First daemon terminated.");
     closelog();
 
     return EXIT_SUCCESS;
