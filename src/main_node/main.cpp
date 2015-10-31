@@ -13,6 +13,10 @@
 #include <syslog.h>
 #include <pthread.h>
 
+#include "sync.h"
+#include "comm.h"
+#include "light.h"
+
 
 // TODO: implement signal handlers...
 void sig_handler(int signum)
