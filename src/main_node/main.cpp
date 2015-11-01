@@ -16,6 +16,7 @@
 #include "sync.h"
 #include "comm.h"
 #include "light.h"
+#include "monitor.h"
 
 
 // TODO: implement signal handlers...
@@ -91,9 +92,6 @@ static void skeleton_daemon()
     openlog("rpi_main_controller", LOG_PID, LOG_DAEMON);
 }
 
-void* command_thread(void*);
-void* worker_thread(void*);
-
 int main()
 {
     // call the skeletal standard daemon code...
@@ -110,6 +108,8 @@ int main()
     // - open serial port and talk to the teensy light controller...
     // - depending on mode connect to configured camera ip/ports...
     // - periodially polls cameras for activity...
+    // - starts a third thread that monitors the system e.g. system temp...
+    // 
 
     while (1)
     {
@@ -123,18 +123,4 @@ int main()
     closelog();
 
     return EXIT_SUCCESS;
-}
-
-// listens for commands through ip socket...
-// expose the same interface thru use of the daemon as executable!? possible?
-void* command_thread(void* p)
-{
-  return 0;
-}
-
-// periodically polls cameras, handle data and send updates to light controller.
-// also waits for commands from the command thread or signals to be killed.
-void* worker_thread(void* p)
-{
-  return 0;
 }

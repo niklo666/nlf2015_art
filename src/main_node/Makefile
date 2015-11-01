@@ -15,7 +15,7 @@ LFLAGS =
 #LIBS = -lmylib -lm
 LIBS =
 
-SRCS = main.cpp camera.cpp comm.cpp sync.cpp monitor.cpp
+SRCS = main.cpp light.cpp comm.cpp sync.cpp monitor.cpp
 
 # the build target executable:
 TARGET = camera_node
