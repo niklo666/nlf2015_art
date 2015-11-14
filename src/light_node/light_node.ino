@@ -12,9 +12,18 @@
 #include <Adafruit_DotStar.h>
 
 /*
-
   todo: update light "areas" and behaviours...
+  light areas and their behaviours (normal):
+  - funnel, static color but variable intensity...
+  - strands, patterns and palettes also variable intensity...
+  - text, static color and patterns (worms or point with after glow) with static intensity
+  - circle ambient, static color variable intensity...
+  - lips, static color variable intensity...
+  - eyes, static color variable intensity...
+  - mains, no color control but dimmable...
+  
   todo: update to handle scenarious and complex workings...
+  this stuff should reside in main controller. the light controller only do simple stuff...
 
   light node
   lighting behaviour needed/wanted:
@@ -23,7 +32,7 @@
   - "static" colors, used for mouths and eyes, probably only dimming with one static color per item
 
   communication could be by CAN as it can handle distance and is quite resistant to disturbances *AND* is bidirectional.
-  but we will probably go for ttl usart as it is short haul between main controller and light controller
+  but we will probably go for ttl usart as it is short haul between main controller and light controller!!
 
   possibly separate applications distributed over several nodes for differens areas.
   in that case a lib should be developed and used.
@@ -37,7 +46,6 @@
   - adjust light source intensity individual, group, all...
   - activate "pattern"/behaviour on (indivdual), group, (all) e.g. "flickering", "randomness"
   - all off...
-
 */
 
 void setup()
@@ -47,14 +55,16 @@ void setup()
   // todo: init lighting stuff...
   // - init power control io and see to that power is turned off...
   // - init ws2801 control io and see to that leds are off...
+  // - init dotstar/apa102 io and see to that leds are off...
   // - init datastructures...
 
   // todo: init comm stuff...
-  // - use usart
+  // - use usart...
 }
 
 void communication_handler(void);
 void command_handler(void);
+void light_handler(void);
 
 void loop()
 {
@@ -66,9 +76,7 @@ void loop()
   command_handler();
 
   // todo: do autonomous stuff e.g. dimming, contingency/"idle" mode behaviour...
-
   // todo: update lighting...
-
 }
 
 
@@ -82,15 +90,28 @@ typedef struct
   uint16_t  light;      //
   uint8_t   color[3];   //
   uint8_t   intensity;  //
-  uint8_t   pattern;  //
+  uint8_t   pattern;    //
   uint16_t  time;       //
 }cmd_message_t;
 
 enum
 {
-  CMD_NONE    = 0,    //
-  CMD_STATUS,         //
-  CMD_SET_LIGHT,      //
+  CMD_NONE        = 0,    //
+  CMD_STATUS,             //
+  CMD_SET_LIGHT,          //
+  CMD_ADJ_LIGHT,          //
+};
+
+enum 
+{
+  LIGHT_GROUP_NONE    = 0x0000,
+  LIGHT_GROUP_FUNNEL  = 0x1000,
+  LIGHT_GROUP_STRANDS = 0x2000,
+  LIGHT_GROUP_TEXT    = 0x3000,
+  LIGHT_GROUP_CIRCLE  = 0x4000,
+  LIGHT_GROUP_LIPS    = 0x5000,
+  LIGHT_GROUP_EYES    = 0x6000,
+  LIGHT_GROUP_BULBS   = 0x7000,
 };
 
 
@@ -143,5 +164,13 @@ void command_handler(void)
   }
 }
 
+//
+//
+//
+void light_handler(void)
+{
+  // todo: do autonomous stuff like dimming, patterns etc...
 
-// todo:
+  // todo: update the actual lights...
+}
+
