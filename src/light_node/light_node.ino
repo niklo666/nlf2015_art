@@ -100,11 +100,12 @@ void loop()
 
 typedef struct
 {
-  uint8_t   command;    //
-  uint16_t  light;      //
-  uint8_t   color[3];   //
-  uint8_t   intensity;  //
-  uint8_t   pattern;    //
+  uint8_t   command;    // commande code...
+  uint16_t  light;      // light identifier...
+  uint8_t   color[3];   // color rgb data for explicit setting of color...
+  uint8_t   intensity;  // intensity value used for showing color...
+  uint8_t   pattern;    // pattern...
+  uint8_t   palette;    // palette used together with pattern...
   uint16_t  time;       //
 }cmd_message_t;
 
@@ -126,7 +127,16 @@ enum
   LIGHT_GROUP_LIPS    = 0x5000,
   LIGHT_GROUP_EYES    = 0x6000,
   LIGHT_GROUP_BULBS   = 0x7000,
+  
+  LIGHT_GROUP_ALL     = 0xF000,
 };
+
+enum
+{
+  LIGHT_PATTERN_NONE = 0,
+  LIGHT_PATTERN_STATIC,     // used for all but strands!?
+  LIGHT_PATTERN_FLICKER,    // only used for strands...
+}
 
 
 QueueList<uint8_t>        g_incoming_buffer;          // queue of bytes before assembly...
