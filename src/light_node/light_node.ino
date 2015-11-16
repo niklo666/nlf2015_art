@@ -14,14 +14,13 @@
 /*
   todo: update light "areas" and behaviours...
   light areas and their behaviours (normal):
-  - funnel, static color but variable intensity...
   - strands, patterns and palettes also variable intensity...
   - text, static color and patterns (worms or point with after glow) with static intensity
   - circle ambient, static color variable intensity...
   - lips, static color variable intensity...
   - eyes, static color variable intensity...
   - mains, no color control but dimmable...
-  
+
   todo: update to handle scenarious and complex workings...
   this stuff should reside in main controller. the light controller only do simple stuff...
 
@@ -46,6 +45,24 @@
   - adjust light source intensity individual, group, all...
   - activate "pattern"/behaviour on (indivdual), group, (all) e.g. "flickering", "randomness"
   - all off...
+
+  todo: update pin mapping:
+  TBD   light channel 0 clock
+  TBD   light channel 0 data
+  TBD   light channel 1 clock
+  TBD   light channel 1 data
+  TBD   light channel 2 clock
+  TBD   light channel 2 data
+  TBD   light channel 3 clock
+  TBD   light channel 3 data
+  TBD   light channel 4 clock
+  TBD   light channel 4 data
+  TBD   mains zero detect
+  TBD   mains dimmer control 0
+  TBD   mains dimmer control 1
+  TBD   i2c sda
+  TBD   i2c scl
+
 */
 
 void setup()
@@ -102,7 +119,7 @@ enum
   CMD_ADJ_LIGHT,          //
 };
 
-enum 
+enum
 {
   LIGHT_GROUP_NONE    = 0x0000,
   LIGHT_GROUP_FUNNEL  = 0x1000,
@@ -173,4 +190,3 @@ void light_handler(void)
 
   // todo: update the actual lights...
 }
-
