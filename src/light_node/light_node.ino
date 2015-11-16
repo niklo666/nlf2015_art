@@ -4,6 +4,8 @@
 
 #include <SPI.h>
 #include <QueueList.h>
+// todo: use fastled...
+// todo: remove dotstar...
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_DotStar.h>
 
