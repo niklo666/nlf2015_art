@@ -1,0 +1,19 @@
+Det här är ett försök till beskrivning av hela "systemet" för att:
+- ordna tankarna
+- hålla rätt fokus
+- delge till andra
+
+Systemet består av tre(fyra) delar:
+- konstverket, innehållande:
+  * huvudintelligensen i form av en Raspberry Pi
+  * ljusstyrning i form av en teensy (arduinoklon)
+- en enkel kameranod (RPi + Cam) placerad tv framifrån sett för att implementera interaktivitet i det stora glaspartiet.
+- en dubbel kameranod(RPi + Cam) (+switch) placerad th framifrån sett för att implementera interaktivitet i det stora glaspartiet samt fönster baksida.
+
+* lägg in beskrivning av interaktiviteten *
+
+Huvudnoden etablerar en anslutning till kameranoderna och startar rörelse-/närvaro-detektionen. 
+Kameranoderna returnerar kontinuerligt räknare för objektdetektion. För stora partiet returneras data flera sektorer
+samt från två kameror. Detta används dels för att räkna fram allmän aktivitet som styrs installationens generella 
+ljusstyrka samt dels för att få fram specifika data för skärningen mellan två sektorer från de olika kamerorna för att 
+aktivera munsymboler samt text. För kamera riktad mot baksidan detekteras aktivitet som styr ögonsymbolerna samt text.
