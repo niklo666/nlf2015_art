@@ -1,0 +1,3 @@
+/*
+  shared include file for definition of the communication between light and main node...
+*/
