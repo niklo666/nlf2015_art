@@ -2,7 +2,7 @@
   *** camera_node ***
   comm_protocol.h
 */
-
+// todo: move file/contents to #include "../../shared/camera_protocol.h"
 
 enum
 {
@@ -35,5 +35,5 @@ typedef struct
 
 /*
  response is a cmd hdr with first data object uint8_t containing status i.e. always size >1...
- also inlcude overall system status as we won´t have any async way of alerting system errors for instance low temp, camera fail etc... 
+ also inlcude overall system status as we won´t have any async way of alerting system errors for instance low temp, camera fail etc...
 */
