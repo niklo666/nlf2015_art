@@ -1,3 +1,6 @@
+// ported to work with teensy...
+
+
 // AC Control V1.1
 //
 // This arduino sketch is for use with the heater 
