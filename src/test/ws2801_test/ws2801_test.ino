@@ -39,45 +39,61 @@ void loop()
   Serial1.print("hello");
 
   // Turn the LED on, then pause
-  //myfill(CRGB::Red);
+  myfill(CRGB::Red);
   FastLED.show();
   digitalWrite(ledPin, HIGH);
   Serial.print("all red\r\n");
-  delay(1000);
+  delay(5000);
 
   // Now turn the LED off, then pause
   myfill(CRGB::Black);
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(1000);
+  delay(5000);
 
   myfill(CRGB::Blue);
   FastLED.show();
   digitalWrite(ledPin, HIGH);
   Serial.print("all blue\r\n");
-  delay(1000);
+  delay(5000);
 
   // Now turn the LED off, then pause
   myfill(CRGB::Black);
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(1000);
+  delay(5000);
   
   // Turn the LED on, then pause
   myfill(CRGB::Green);
   FastLED.show();
   digitalWrite(ledPin, HIGH);
   Serial.print("all green\r\n");
-  delay(1000);
+  delay(5000);
   
   // Now turn the LED off, then pause
   myfill(CRGB::Black);
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(1000);
+  delay(5000);
+
+
+  // Turn the LED on, then pause
+  myfill(CRGB::White);
+  FastLED.show();
+  digitalWrite(ledPin, HIGH);
+  Serial.print("all green\r\n");
+  delay(5000);
+  
+  // Now turn the LED off, then pause
+  myfill(CRGB::Black);
+  FastLED.show();
+  digitalWrite(ledPin, LOW);
+  Serial.print("all black\r\n");
+  delay(5000);
+  
 }
 
 

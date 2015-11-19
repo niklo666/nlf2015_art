@@ -1,6 +1,9 @@
 /*
   *** camera_node ***
   comm.c
+
+  todo:
+  maybe change comm structure to use one command channel from main node and one data channel to main node.
 */
 
 #include "comm.h"
