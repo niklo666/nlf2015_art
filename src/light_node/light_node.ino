@@ -9,6 +9,8 @@
 #include <Adafruit_NeoPixel.h>
 #include <Adafruit_DotStar.h>
 
+// todo: update to use shared protocol definition include file(s)...
+
 /*
   todo: update light "areas" and behaviours...
   light areas and their behaviours (normal):
