@@ -8,3 +8,6 @@ opencv_test: opencv_test.o
 
 .cpp.o:
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
+
+clean:
+	rm -f *.o opencv_test

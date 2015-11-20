@@ -69,6 +69,7 @@ while True:
   		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
   		text = "Occupied"
 */
+#include <iostream>
 
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgcodecs.hpp"
@@ -81,6 +82,7 @@ while True:
 #include "opencv2/highgui/highgui_c.h"
 
 using namespace cv;
+using namespace std;
 
 int main(int argc, char** argv)
 {
@@ -90,8 +92,9 @@ int main(int argc, char** argv)
   if(!cap.isOpened())  // check if we succeeded
       return -1;
 
-  Mat edges;
+//  Mat edges;
   namedWindow("edges",1);
+//  namedWindow("firstframe",1);
   for(;;)
   {
     int cnt = 0;
@@ -99,23 +102,61 @@ int main(int argc, char** argv)
       cap >> frame; // get a new frame from camera
 
 //      resize(frame, frame, Size(0,0), 0.5, 0.5);
-      cvtColor(frame, edges, cv::COLOR_BGR2GRAY);
-      GaussianBlur(edges, edges, Size(21,21), 0);
+      cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
+      GaussianBlur(frame, frame, Size(21,21), 0);
 
       if (!got_first_frame)
       {
-        first_frame = edges;
+        cout << "first frame!\r\n";
+        first_frame = frame;
         got_first_frame = 1;
+  //      imshow("firstframe", first_frame);
       }
 
-      absdiff(first_frame, edges, frameDelta);
-    	threshold(frameDelta, thresh, 5, 255, THRESH_BINARY);
-      dilate(thresh, thres, NULL, iterations=2)
-    	cnt = findContours(thresh, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+      absdiff(first_frame, frame, frameDelta);
+    	threshold(frameDelta, thresh, 25, 255, THRESH_BINARY);
+      //dilate(thresh, thresh, NULL, iterations=2);
+      dilate(thresh, thresh, NULL, Point(-1,-1), 2);
 
-      
-//      Canny(edges, edges, 0, 30, 3);
-      imshow("edges", thresh);
+      vector<vector<Point> > contours;
+      findContours(thresh, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+      cout << "Number of contours: " << contours.size() << "\r\n";
+
+      for (int i = 0 ; i < contours.size(); i++)
+      {
+        // # if the contour is too small, ignore it
+    		// if cv2.contourArea(c) < args["min_area"]:
+    		// 	continue
+
+        if (contourArea(contours[i]) >= 10000)
+        {
+          //
+      		// # compute the bounding box for the contour, draw it on the frame,
+      		// # and update the text
+      		// (x, y, w, h) = cv2.boundingRect(c)
+          Rect bound = boundingRect(contours[i]);
+
+      		// cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+          rectangle(frame, bound, Scalar(0,0,0));
+
+      		// text = "Occupied"
+          String text = "Occupied";
+
+          // # draw the text and timestamp on the frame
+        	// cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
+          // 	cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+          //String roomStatus = "Room Status: " << text;
+          putText(frame, text, Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
+
+          // cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+        	// 	(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+          //
+        }
+      }
+
+//      Canny(edges, edges, 0, 25, 3);
+      imshow("edges", frame);
       if(cv::waitKey(30) >= 0) break;
   }
 
