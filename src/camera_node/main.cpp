@@ -2,9 +2,13 @@
   *** camera_node ***
   main.cpp
 
+  todo: first throw: regular app, synchronous acquiring of images...
+  todo: implement get image functions to test on site e.g. get the idea of good sectors...
+
   functionality:
   - comm thread: open socket and listen for requests (start, stop, get data, set parameters) in own thread...
   - cam thread: separate thread for acquiring cam images and perform calculations...
+
 */
 
 // todo: daemonize!!!

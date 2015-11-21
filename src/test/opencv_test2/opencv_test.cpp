@@ -94,6 +94,8 @@ int main(int argc, char** argv)
   if(!cap.isOpened())  // check if we succeeded
       return -1;
 
+  sleep(2);
+
 //  Mat edges;
   namedWindow("edges",1);
 //  namedWindow("firstframe",1);
@@ -123,7 +125,7 @@ int main(int argc, char** argv)
 	    // # previous frames, then compute the difference between the current
 	    // # frame and running average
 	    // cv2.accumulateWeighted(gray, avg, 0.5)
-      accumulateWeighted(floatimg, average, 0.5);
+      accumulateWeighted(floatimg, average, 0.01);
 
 	    // frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
       absdiff(floatimg, average, frameDelta);
@@ -147,7 +149,7 @@ int main(int argc, char** argv)
     		// if cv2.contourArea(c) < args["min_area"]:
     		// 	continue
 
-        if (contourArea(contours[i]) >= 10000)
+        if (contourArea(contours[i]) >= 100)
         {
           //
       		// # compute the bounding box for the contour, draw it on the frame,
