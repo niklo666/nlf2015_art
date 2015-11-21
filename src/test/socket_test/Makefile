@@ -5,11 +5,11 @@ CXXFLAGS = -Wall  														# put compiler settings here
 
 all: socket_client socket_server
 
-socket_client:
-	$(CXX)  socket_client.cpp $(CXXFLAGS) $(LDFLAGS) -o socket_client.o
+socket_client: socket_client.cpp
+	$(CXX) socket_client.cpp $(CXXFLAGS) $(LDFLAGS) -o socket_client
 
-socket_server:
-	$(CXX) socket_server.cpp $(CXXFLAGS) $(LDFLAGS) -o socket_server.o
+socket_server: socket_server.cpp
+	$(CXX) socket_server.cpp $(CXXFLAGS) $(LDFLAGS) -o socket_server
 
 #.cpp.o:
 #	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
