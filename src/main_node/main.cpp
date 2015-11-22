@@ -1,4 +1,6 @@
 /*
+ * main.cpp
+ * shamelessly stolen code...
  * daemonize.c
  * This example daemonizes a process, writes a few log messages,
  * sleeps 20 seconds and terminates afterwards.
@@ -92,10 +94,15 @@ static void skeleton_daemon()
     openlog("rpi_main_controller", LOG_PID, LOG_DAEMON);
 }
 
+// the main thread to perform all or most stuff in the simple implementation.
+// could easily be moved to separate  etc...
+void main_thread(void *p);
+
 int main()
 {
+    // todo: include the daemon stuff...
     // call the skeletal standard daemon code...
-    skeleton_daemon();
+//    skeleton_daemon();
 
     // todo: replace example code...
     // - open config file for settings like start mode etc etc etc...
@@ -109,18 +116,43 @@ int main()
     // - depending on mode connect to configured camera ip/ports...
     // - periodially polls cameras for activity...
     // - starts a third thread that monitors the system e.g. system temp...
-    // 
+    //
+    // or startout simpler:
+    // - use one main thread that:
+    //  * periodically polls the cameras and collect occupancie info...
+    //  * call light node to possibly update colors and/or intensities...
+    // - use one thread for allowing direct commands from ethernet...
 
     while (1)
     {
         //TODO: Insert daemon code here.
-        syslog(LOG_NOTICE, "First daemon started.");
+        syslog(LOG_NOTICE, "main application started.");
         sleep (20);
         break;
     }
 
-    syslog(LOG_NOTICE, "First daemon terminated.");
+    syslog(LOG_NOTICE, "main application terminated.");
     closelog();
 
     return EXIT_SUCCESS;
+}
+
+enum
+{
+  RUN_MODE_IDLE = 0,  // idle looping waiting for commands...
+  RUN_MODE_NORMAL,    // running the normal control looop...
+};
+
+
+void main_thread(void *p)
+{
+  // todo: implement...
+  // - init:
+  //  * load configuration or use default parameters...
+  //  * init cameras...
+  //  * open serial port to light controller
+  //  * init light controller...
+  // - periodically poll cameras for info...
+  // - update light control as needed...
+  //
 }
