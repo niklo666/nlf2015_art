@@ -13,6 +13,15 @@
 
 // todo: daemonize!!!
 // todo: implement syslogging...
+// todo: s-i-m-p-l-i-f-y!!! all synchronous
+// basically:
+// - init socket and listen for requests...
+// - on accept listen for commands that are synchronously executed...
+// simple commands:
+// - set/get params...
+// - acquire calculated image data...
+// - acquire raw (encoded) image data...
+//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,9 +33,10 @@
 int main()
 {
   int ret = 0;
-  pthred_t comm_thread;
-  pthred_t camera_thread;
-  pthred_t monitor_thread;
+
+  pthread_t comm_thread;
+  pthread_t camera_thread;
+  pthread_t monitor_thread;
 
   // todo: create/init data queue...
   // todo: create start/stop sync item(s), init to stop...
