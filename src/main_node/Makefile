@@ -17,15 +17,17 @@ LIBS =
 
 SRCS = main.cpp light.cpp comm.cpp sync.cpp monitor.cpp
 
+MAIN = main_node_app
+
 # the build target executable:
-TARGET = camera_node
+TARGET = main_node_app
 
 OBJS = $(SRCS:.cpp=.o)
 
 .PHONY: depend clean
 
 all: $(TARGET)
-	@echo  camera_node has been compiled
+	@echo  main_node has been compiled
 
 $(TARGET): $(OBJS)
 	$(CPP) $(CPPFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
@@ -34,4 +36,4 @@ depend: $(SRCS)
 	makedepend $(INCLUDES) $^
 
 clean:
-	$(RM) $(TARGET)
+	$(RM) $(TARGET) *.o
