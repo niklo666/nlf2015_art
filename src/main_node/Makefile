@@ -13,7 +13,7 @@ INCLUDES =
 LFLAGS =
 
 #LIBS = -lmylib -lm
-LIBS =
+LIBS = -lpthread
 
 SRCS = main.cpp light.cpp comm.cpp sync.cpp monitor.cpp
 

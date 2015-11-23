@@ -21,6 +21,10 @@
 #include "monitor.h"
 
 
+//
+pthread_t main_tid = 0;
+pthread_t comm_tid = 0;
+
 // TODO: implement signal handlers...
 void sig_handler(int signum)
 {
@@ -136,11 +140,12 @@ int main()
         syslog(LOG_NOTICE, "main application started.");
 
         // todo: start main thread...
-        err = pthread_create(&(tid[i]), NULL, &main_thread, NULL);
+        err = pthread_create(&main_tid, NULL, &main_thread, NULL);
         if (err != 0)
             {
               // todo: handle error...
-              printf("\ncan't create thread :[%s]", strerror(err));
+              //printf("\ncan't create thread :[%s]", strerror(err));
+              printf("\ncan't create thread :[%d]", err);
             }
         else
             {
@@ -148,11 +153,12 @@ int main()
             }
 
         // todo: start comm thread...
-        err = pthread_create(&(tid[i]), NULL, &main_thread, NULL);
+        err = pthread_create(&comm_tid, NULL, &main_thread, NULL);
         if (err != 0)
             {
               // todo: handle error...
-              printf("\ncan't create thread :[%s]", strerror(err));
+              //printf("\ncan't create thread :[%s]", strerror(err));
+              printf("\ncan't create thread :[%d]", err);
             }
         else
             {
