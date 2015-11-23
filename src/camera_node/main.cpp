@@ -26,14 +26,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+
+
+
 #include "comm.h"
 #include "camera.h"
 #include "monitor.h"
+
+/*
+int set_parameter_handler(uint8_t parameter, double value);
+int get_parameter_handler(uint8_t parameter, double &value);
+int get_derived_image_data_handler();
+int get_raw_image_data_handler();
+*/
 
 int main()
 {
   int ret = 0;
 
+  // todo: daemon stuff...
+
+  // todo: init stuff e.g. socket...
+
+  while (1)
+  {
+    // todo: accept connects...
+
+    // todo: wait forand process commands...
+
+  }
+
+
+
+/*
   pthread_t comm_thread;
   pthread_t camera_thread;
   pthread_t monitor_thread;
@@ -80,6 +105,6 @@ int main()
 
   // if we reach here both of the threads has died...
   // probably it should be like that but...
-
+*/
   return 0;
 }
