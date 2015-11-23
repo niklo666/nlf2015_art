@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
   }
 
   int sockfd, portno, n;
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
+/*  struct sockaddr_in serv_addr;
+  struct hostent *server;*/
   char buffer[256];
 
   // todo: sanity check...
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
 int socket_init(char* hostname, int portno)
 {
-  int sockfd, portno, n;
+  int sockfd/*, portno, n*/;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   //char buffer[256];
