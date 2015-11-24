@@ -6,23 +6,67 @@
   the data channel is pure data and possibly no ack (UDP)
 */
 
+#ifndef CAMERA_PROTOCOL_H
+#define CAMERA_PROTOCOL_H
+
+#define CAMERA_NODE_PROTOCOL_VERSION 0x0001 //
+
+#define CAMERA_NODE_DEFAULT_PORT  1347
+
 typedef struct
 {
-  uint8_t cmd;      // commande id...
-  uint8_t length;   // length of the rest...
+  uint8_t cmd;      // command id...
+  uint8_t size;     // length of the rest...
 }camera_command_comm_header_t;
 
+typedef struct
+{
+  uint8_t cmd;      // command id...
+  uint8_t status;   //
+  uint8_t size;     // length of the rest...
+}camera_response_header_t;
 
 enum
 {
   CAMERA_COMMAND_NONE = 0,      // no command...
-  CAMERA_COMMAND_START,         // start, async mode...
-  CAMERA_COMMAND_STOP,          // stop, async mode...
+//  CAMERA_COMMAND_START,         // reserved: start, async mode...
+//  CAMERA_COMMAND_STOP,          // reserved: stop, async mode...
   CAMERA_COMMAND_GET_CAM_DATA,  // sync acquire image and perform calculations...
   CAMERA_COMMAND_GET_CAM_IMAGE, // sync acquire image, encode and send...
   CAMERA_COMMAND_STATUS,        // camera node status...
   CAMERA_COMMAND_SET_PARAMETER, // possibility to set new parameters (or always do before start!?)
+  CAMERA_COMMAND_GET_PARAMETER, // possibility to set new parameters (or always do before start!?)
 };
+
+enum
+{
+  CAM_NODE_RESP_STATUS_OK = 0,
+
+  CAM_NODE_RESP_STATUS_UNKNOWN_COMMAND,
+
+//  CAM_NODE_RESP_STATUS_ALREADY_RUNNING,
+//  CAM_NODE_RESP_STATUS_NOT_RUNNING,
+
+  CAM_NODE_RESP_STATUS_UNKNOWN_PARAMETER,
+  CAM_NODE_RESP_STATUS_PARAMETER_OUT_OF_RANGE,
+  CAM_NODE_RESP_STATUS_PARAMETER_INVALID,
+
+  CAM_NODE_RESP_STATUS_GENERAL_ERROR = -1,
+};
+
+enum
+{
+  CAMERA_PARAMETER_NONE = 0,
+
+};
+
+// todo: move to protocol...
+typedef struct
+{
+  uint8_t number_of_slots;
+  uint8_t slot_count[10];
+}camera_data_t;
+
 
 // start command: no parameters
 // stop command: no parameters
@@ -33,6 +77,9 @@ typedef struct
 {
   uint8_t parameter_id;
   double  value;
-}camera_set_parameters_header_t
+}camera_set_parameters_header_t;
+
 
 // todo: add enum for parameters...
+
+#endif // CAMERA_PROTOCOL_H

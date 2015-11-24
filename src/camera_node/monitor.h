@@ -1,4 +1,4 @@
 
 
 
-void* monitor_thread_function(void* ptr)
+void* monitor_thread_function(void* ptr);

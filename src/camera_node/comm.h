@@ -3,4 +3,4 @@
   comm.h
 */
 
-void *comm_thread_function( void *ptr );
+//void *comm_thread_function( void *ptr );

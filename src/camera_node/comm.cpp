@@ -6,11 +6,13 @@
   maybe change comm structure to use one command channel from main node and one data channel to main node.
 */
 
+#include <stdint.h>
 #include "comm.h"
-#include "comm_protocol.h"
-#include "sync.h"
+#include "../../shared/camera_protocol.h"
+//#include "comm_protocol.h"
+//#include "sync.h"
 
-
+/*
 void *comm_thread_function( void *ptr )
 {
   // todo: create listening thread...
@@ -26,3 +28,4 @@ void *comm_thread_function( void *ptr )
   // - reacted on a shutdown cmd or so...
   return 0;
 }
+*/
