@@ -4,6 +4,9 @@
 */
 // todo: move file/contents to #include "../../shared/camera_protocol.h"
 
+#ifndef COMM_PROTOCOL_H
+#define COMM_PROTOCOL_H
+
 enum
 {
   CAM_NODE_CMD_MSG_NONE = 0,  //
@@ -37,3 +40,5 @@ typedef struct
  response is a cmd hdr with first data object uint8_t containing status i.e. always size >1...
  also inlcude overall system status as we won´t have any async way of alerting system errors for instance low temp, camera fail etc...
 */
+
+#endif // COMM_PROTOCOL_H
