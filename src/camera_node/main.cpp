@@ -147,14 +147,13 @@ int main(int argc, char* argv[])
 
   // todo: init stuff e.g. socket...
 
-
-
    if (argc == 2)
    {
      portno = atoi(argv[1]);
    }
    else
    {
+     cout << "WARNING: default camera node port is used\r\n";
      portno = CAMERA_NODE_DEFAULT_PORT;
    }
 
@@ -177,7 +176,7 @@ int main(int argc, char* argv[])
       error("ERROR on binding");
     }
 
-  cout << "Successful bind\r\n";
+  cout << "Successful bind to port number: " << portno << "\r\n";
   cout << "Listening...\r\n";
 
   listen(sockfd, 5);

@@ -68,6 +68,11 @@ int camera_get_parameter(uint8_t parameter_id, double *value)
       // do nothing...
       *value = 0.0;
       break;
+      
+    case CAMERA_PARAMETER_ACCUMULATE_ALPHA_FAST:
+    case CAMERA_PARAMETER_ACCUMULATE_ALPHA_SLOW:
+    case CAMERA_PARAMETER_THRESHOLD:
+    case CAMERA_PARAMETER_THRESHOLD_MAX:
   }
 
   return 0;

@@ -15,6 +15,10 @@
 typedef struct
 {
   // todo: add useful parameters...
+  double alpha_fast;
+  double alpha_slow;
+  double threshold;
+  double threshold_max;
 }camera_parameters_t;
 
 
