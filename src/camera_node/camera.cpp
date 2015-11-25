@@ -6,6 +6,13 @@
 #include <iostream>
 #include <stdint.h>
 #include <inttypes.h>
+#include <time.h>
+
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/videoio.hpp"
@@ -125,8 +132,24 @@ int camera_get_parameter(uint8_t parameter_id, double *value)
   return 0;
 }
 
+void my_gettime(struct timespec* ts)
+{
+#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+  clock_serv_t cclock;
+  mach_timespec_t mts;
+  host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+  clock_get_time(cclock, &mts);
+  mach_port_deallocate(mach_task_self(), cclock);
+  ts->tv_sec = mts.tv_sec;
+  ts->tv_nsec = mts.tv_nsec;
+#else
+  clock_gettime(CLOCK_REALTIME, ts);
+#endif
+}
+
 // sample image and calculate data...
 // todo: break into sub function to avoid code dups...
+// todo: add timing functions to calculate "fps"...
 int camera_get_data(camera_data_t* data)
 {
   Mat frame;
@@ -137,6 +160,11 @@ int camera_get_data(camera_data_t* data)
   Mat floatimg;
   uint16_t contour_counter_slow = 0;
   uint16_t contour_counter_fast = 0;
+  timespec start_time;
+  timespec stop_time;
+
+  // get start time...
+  my_gettime(&start_time);
 
   // todo: check cap is open...
 
@@ -217,6 +245,12 @@ int camera_get_data(camera_data_t* data)
 
   data->slot_count_slow[0] = contour_counter_slow;
   data->slot_count_slow[0] = contour_counter_fast;
+
+  // get stop time...
+  // get start time...
+  my_gettime(&stop_time);
+
+  // todo: calculate time diff...
 
   return 0;
 }

@@ -74,12 +74,13 @@ enum
   //...
 };
 
-// todo: move to protocol...
+
 typedef struct
 {
-  uint8_t number_of_slots;                                // good to know even if static!?
+  uint8_t number_of_slots;                                    // good to know even if static!?
   uint8_t slot_count_slow[CAMERA_NODE_MAX_NUMBER_OF_SLOTS];   //
   uint8_t slot_count_fast[CAMERA_NODE_MAX_NUMBER_OF_SLOTS];   //
+  uint16_t execution_time_ms;                                // execution time for image processing...
 }camera_data_t;
 
 
