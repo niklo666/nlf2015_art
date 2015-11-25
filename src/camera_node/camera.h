@@ -24,6 +24,7 @@ typedef struct
 
 /*void *cam_thread_function( void *ptr );*/
 int camera_init(void);
+int camera_reset(void);
 int camera_set_parameter(uint8_t parameter_id, double value);
 int camera_get_parameter(uint8_t parameter_id, double *value);
 int camera_get_data(camera_data_t* data);

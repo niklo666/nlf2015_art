@@ -13,6 +13,8 @@
 
 #define CAMERA_NODE_DEFAULT_PORT  1347
 
+#define CAMERA_NODE_MAX_NUMBER_OF_SLOTS 10
+
 typedef struct
 {
   uint8_t cmd;      // command id...
@@ -66,7 +68,7 @@ enum
   CAMERA_PARAMETER_THRESHOLD,
   CAMERA_PARAMETER_THRESHOLD_MAX,
 
-  // contour area...
+  // contours...
   CAMERA_PARAMETER_MIN_CONTOUR_AREA,
 
   //...
@@ -75,8 +77,9 @@ enum
 // todo: move to protocol...
 typedef struct
 {
-  uint8_t number_of_slots;
-  uint8_t slot_count[10];
+  uint8_t number_of_slots;                                // good to know even if static!?
+  uint8_t slot_count_slow[CAMERA_NODE_MAX_NUMBER_OF_SLOTS];   //
+  uint8_t slot_count_fast[CAMERA_NODE_MAX_NUMBER_OF_SLOTS];   //
 }camera_data_t;
 
 

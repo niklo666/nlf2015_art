@@ -3,6 +3,7 @@
   camera.c
 */
 
+#include <iostream>
 #include <stdint.h>
 #include <inttypes.h>
 #include "opencv2/objdetect.hpp"
@@ -18,6 +19,7 @@
 //#include "sync.h"
 
 using namespace cv;
+using namespace std;
 
 
 // todo: some kind of "reset" is needed in case parameters are changed...
@@ -30,6 +32,8 @@ static uint8_t              g_parameters_dirty = 1; // used to notify that param
 // todo: does this work...
 static cv::VideoCapture      g_video_capture(0);     // open the default camera
 static Mat                   g_average_slow;
+static Mat                   g_average_fast;
+static int                   g_first_run = 0;
 
 /*
 void *cam_thread_function( void *ptr )
@@ -50,6 +54,13 @@ int camera_init(void)
   return 0;
 }
 
+int camera_reset(void)
+{
+  // signal to the frame acquisition routines that a new set of averages shall be maintained...
+  g_first_run = 1;
+  return 0;
+}
+
 int camera_set_parameter(uint8_t parameter_id, double value)
 {
   switch (parameter_id)
@@ -59,19 +70,19 @@ int camera_set_parameter(uint8_t parameter_id, double value)
       break;
 
     case CAMERA_PARAMETER_ACCUMULATE_ALPHA_FAST:
-      g_parameters.alpha_fast = *value;
+      g_parameters.alpha_fast = value;
       break;
 
     case CAMERA_PARAMETER_ACCUMULATE_ALPHA_SLOW:
-      g_parameters.alpha_slow = *value;
+      g_parameters.alpha_slow = value;
       break;
 
     case CAMERA_PARAMETER_THRESHOLD:
-      g_parameters.threshold = *value;
+      g_parameters.threshold = value;
       break;
 
     case CAMERA_PARAMETER_THRESHOLD_MAX:
-      g_parameters.threshold_max = *value;
+      g_parameters.threshold_max = value;
       break;
 
     default:
@@ -115,15 +126,21 @@ int camera_get_parameter(uint8_t parameter_id, double *value)
 }
 
 // sample image and calculate data...
+// todo: break into sub function to avoid code dups...
 int camera_get_data(camera_data_t* data)
 {
-  int cnt = 0;
-  Mat frame, frameDelta, thresh;
+  Mat frame;
+  Mat frameDelta_slow;
+  Mat frameDelta_fast;
+  Mat thresh_slow;
+  Mat thresh_fast;
   Mat floatimg;
+  uint16_t contour_counter_slow = 0;
+  uint16_t contour_counter_fast = 0;
 
   // todo: check cap is open...
 
-  cap >> frame; // get a new frame from camera
+  g_video_capture >> frame; // get a new frame from camera
 
 //      resize(frame, frame, Size(0,0), 0.5, 0.5);
   cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
@@ -131,12 +148,15 @@ int camera_get_data(camera_data_t* data)
 
   frame.convertTo(floatimg, CV_32FC3);
 
-  if (first_run)
+  if (g_first_run)
   {
     cout << "first run";
+
 //        average = Mat::zeros(floatimg.size(), CV_32FC3);
-    average = floatimg;
-    first_run = 0;
+    g_average_slow = floatimg;
+    g_average_fast = floatimg;
+
+    g_first_run = 0;
   }
 
   // # accumulate the weighted average between the current frame and
@@ -144,12 +164,12 @@ int camera_get_data(camera_data_t* data)
   // # frame and running average
   // cv2.accumulateWeighted(gray, avg, 0.5)
   //accumulateWeighted(floatimg, average, 0.01);
-  accumulateWeighted(floatimg, average_slow, g_parameters.alpha_slow);
-  accumulateWeighted(floatimg, average_fast, g_parameters.alpha_fast);
+  accumulateWeighted(floatimg, g_average_slow, g_parameters.alpha_slow);
+  accumulateWeighted(floatimg, g_average_fast, g_parameters.alpha_fast);
 
   // frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-  absdiff(floatimg, average_slow, frameDelta_slow);
-  absdiff(floatimg, average_fast, frameDelta_fast);
+  absdiff(floatimg, g_average_slow, frameDelta_slow);
+  absdiff(floatimg, g_average_fast, frameDelta_fast);
 
   // thresh = cv2.threshold(frameDelta, conf["delta_thresh"], 255, cv2.THRESH_BINARY)[1]
   threshold(frameDelta_slow, thresh_slow, g_parameters.threshold, g_parameters.threshold_max, THRESH_BINARY);
@@ -161,41 +181,43 @@ int camera_get_data(camera_data_t* data)
 
   // (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
   vector<vector<Point> > contours_slow;
+  vector<vector<Point> > contours_fast;
   thresh_slow.convertTo(thresh_slow, CV_8UC1);
+  thresh_fast.convertTo(thresh_fast, CV_8UC1);
   findContours(thresh_slow, contours_slow, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));
+  findContours(thresh_fast, contours_fast, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-  cout << "Number of contours: " << contours_slow.size() << "\r\n";
+  cout << "Number of slow contours: " << contours_slow.size() << "\r\n";
+  cout << "Number of fast contours: " << contours_fast.size() << "\r\n";
 
-  for (int i = 0 ; i < contours.size(); i++)
+  // todo: add option to make processed and/or raw images available...
+
+  int i = 0;
+  for (i = 0 ; i < contours_slow.size(); i++)
   {
-    // # if the contour is too small, ignore it
-		// if cv2.contourArea(c) < args["min_area"]:
-		// 	continue
-
-    if (contourArea(contours[i]) >= 100)
+    if (contourArea(contours_slow[i]) >= 100)
     {
-      //
-  		// # compute the bounding box for the contour, draw it on the frame,
-  		// # and update the text
-  		// (x, y, w, h) = cv2.boundingRect(c)
-      Rect bound = boundingRect(contours[i]);
+      // todo: implement slots...
+      // idea: use bounding rects to get this...
+      // see example code for achieving this...
 
-  		// cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-      rectangle(frame, bound, Scalar(0,0,0));
-
-  		// text = "Occupied"
-      String text = "Occupied";
-
-      // # draw the text and timestamp on the frame
-    	// cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
-      // 	cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-      //String roomStatus = "Room Status: " << text;
-      putText(frame, text, Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
-
-      // cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-    	// 	(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
-      //
+      // count contours...
+      contour_counter_slow++;
     }
+  }
+
+  for (i = 0 ; i < contours_fast.size(); i++)
+  {
+    if (contourArea(contours_fast[i]) >= 100)
+    {
+      // todo: implement slots or ignore for fast movement!?
+      contour_counter_fast++;
+    }
+  }
+
+  data->slot_count_slow[0] = contour_counter_slow;
+  data->slot_count_slow[0] = contour_counter_fast;
+
   return 0;
 }
 
