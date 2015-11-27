@@ -60,7 +60,7 @@
 */
 
 // pin definitions...
-const int activity_led_pin =  13; // the number of the LED pin
+const int activity_led_pin      = 13; // the number of the LED pin
 const int light_channel0_clock  = 3;
 const int light_channel0_data   = 4;
 const int light_channel1_clock  = 5;
@@ -87,9 +87,9 @@ CRGB text_group0_leds[text_group0_number_of_leds];   // number of leds in the st
 CRGB text_group1_leds[text_group1_number_of_leds];   // number of leds in the strands...
 
 // communication...
-cmd_message_t g_command_buffer;
-uint8_t       g_command_buffer_valid = 0;
-
+light_node_cmd_message_t  g_command_buffer;
+uint8_t                   g_command_buffer_valid = 0;
+  
 
 void setup()
 {
@@ -114,7 +114,6 @@ void setup()
   // init rpi communication port...
   // todo: selecty proper serial port speed...
   Serial1.begin(1000000, SERIAL_8N1);
-  attachInterruptVector(IRQ_UART1_STATUS, myfunction);
 }
 
 void communication_handler(void);
@@ -147,16 +146,16 @@ void communication_init(void)
 void communication_handler(void)
 {
   static uint8_t buffer_counter = 0;
-  static uint8_t buffer[2*sizeof(cmd_message_t)];
-  cmd_message_t* ptr = 0;
+  static uint8_t buffer[2*sizeof(light_node_cmd_message_t)];
+  light_node_cmd_message_t* ptr = 0;
 
   // copy to buffer...
-  while ((buffer_counter < sizeof(cmd_message_t)) && Serial1.available())
+  while ((buffer_counter < sizeof(light_node_cmd_message_t)) && Serial1.available())
   {
     buffer[buffer_counter] = Serial1.read();
   }
 
-  if (buffer_counter < (sizeof(cmd_message_t)))
+  if (buffer_counter < (sizeof(light_node_cmd_message_t)))
   {
     // not a full packet...
     // leave it for next round to handle...
@@ -167,12 +166,12 @@ void communication_handler(void)
 
   // todo: try to assemble packet..
   // todo: if successful, queue...
-  ptr = (cmd_message_t*)buffer;
+  ptr = (light_node_cmd_message_t*)buffer;
   //g_incoming_command_queue.push(*ptr); // todo: doesn't work...
   // todo: queue the message...
-  for (int i =0; i< sizeof(cmd_message_t); i++)
+  for (int i =0; i< sizeof(light_node_cmd_message_t); i++)
   {
-    g_command_buffer[i] = *ptr[i];
+    g_command_buffer[i] = (*ptr)[i];
   }
 
   // todo: sanity check...
@@ -191,8 +190,8 @@ void command_handler(void)
 
   // copy the command code...
   response.command = g_command_buffer.command;
-  response.start_magic  =  
-  response.stop_magic   =
+  response.start_magic  = LIGHT_NODE_MESSAGE_START_MAGIC;
+  response.stop_magic   = LIGHT_NODE_MESSAGE_STOP_MAGIC;
   
   switch (g_command_buffer.command)
   {

@@ -12,6 +12,9 @@
 // Communication stuff...
 //************************
 
+const uint8_t LIGHT_NODE_MESSAGE_START_MAGIC  = 0x02;
+const uint8_t LIGHT_NODE_MESSAGE_STOP_MAGIC   = 0x03;
+
 typedef struct
 {
   uint8_t   start_magic;// start magic...
@@ -58,7 +61,7 @@ enum
   LIGHT_GROUP_LIPS    = 2,
   LIGHT_GROUP_EYES    = 3,
   LIGHT_GROUP_TEXT0   = 4,
-  LIGHT_GROUP_TEXT0   = 5,
+  LIGHT_GROUP_TEXT1   = 5,
   LIGHT_GROUP_BULBS   = 6,
 
   LIGHT_GROUP_ALL     = 0xff,
