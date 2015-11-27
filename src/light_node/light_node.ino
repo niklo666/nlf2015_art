@@ -74,8 +74,6 @@ const int light_channel4_data   = 10;
 const int light_channel5_clock  = 13;   // todo: possible collision with activity LED...
 const int light_channel5_data   = 12;
 
-
-
 // led data...
 const int strands_number_of_leds = 200;     // for now assume all strands are in serial...
 const int lips_number_of_leds = 150;        // for now assume all three symbols use 50 LEDs and are in serial...
@@ -87,6 +85,11 @@ CRGB lips_leds[lips_number_of_leds];   // number of leds in the strands...
 CRGB eyes_leds[eyes_number_of_leds];   // number of leds in the strands...
 CRGB text_group0_leds[text_group0_number_of_leds];   // number of leds in the strands...
 CRGB text_group1_leds[text_group1_number_of_leds];   // number of leds in the strands...
+
+// communication...
+cmd_message_t g_command_buffer;
+uint8_t       g_command_buffer_valid = 0;
+
 
 void setup()
 {
@@ -134,9 +137,6 @@ void loop()
 }
 
 
-QueueList<uint8_t>        g_incoming_buffer;          // queue of bytes before assembly...
-QueueList<cmd_message_t>  g_incoming_command_queue;
-
 // todo: init...
 void communication_init(void)
 {
@@ -168,19 +168,41 @@ void communication_handler(void)
   // todo: try to assemble packet..
   // todo: if successful, queue...
   ptr = (cmd_message_t*)buffer;
-  g_incoming_command_queue.push(*ptr); // todo: doesn't work...
-}
+  //g_incoming_command_queue.push(*ptr); // todo: doesn't work...
+  // todo: queue the message...
+  for (int i =0; i< sizeof(cmd_message_t); i++)
+  {
+    g_command_buffer[i] = *ptr[i];
+  }
 
+  // todo: sanity check...
+
+  g_command_buffer_valid = 1;
+}
 
 void command_handler(void)
 {
-  cmd_message_t message;
+  light_node_resp_message_t response;
+  
+  if (!g_command_valid)
+  {
+    return;
+  }
 
-  message = g_incoming_command_queue.pop(); // todo: doesn't work...
-
-  switch (message.command)
+  // copy the command code...
+  response.command = g_command_buffer.command;
+  response.start_magic  =  
+  response.stop_magic   =
+  
+  switch (g_command_buffer.command)
   {
     // todo: implement commands...
+    case LIGHT_NODE_COMMAND_NONE:
+      // do nothing but give some response...
+      response.status = 0;
+
+    default:
+      response.status = ;
   }
 }
 

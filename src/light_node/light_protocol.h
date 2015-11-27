@@ -23,28 +23,45 @@ typedef struct
   uint8_t   palette;    // palette used together with pattern...
   uint16_t  time;       //
   uint8_t   stop_magic; // stop magic...
-}cmd_message_t;
+}light_node_cmd_message_t;
+
+typedef struct
+{
+  uint8_t   start_magic;  // start magic...
+  uint8_t   command;      // for matching and sanity...
+  uint8_t   status;       // the actual response....
+  uint8_t   stop_magic;   // stop magic...
+}light_node_resp_message_t;
 
 enum
 {
-  CMD_NONE        = 0,    //
-  CMD_STATUS,             //
-  CMD_SET_LIGHT,          //
-  CMD_ADJ_LIGHT,          //
+  LIGHT_NODE_STATUS_OK,  //
+
+  LIGHT_NODE_STATUS_UNKNOWN_COMMAND,
+
+  LIGHT_NODE_STATUS_GENERAL_ERROR = 0xff
 };
 
 enum
 {
-  LIGHT_GROUP_NONE    = 0x0000,
-  LIGHT_GROUP_FUNNEL  = 0x1000,
-  LIGHT_GROUP_STRANDS = 0x2000,
-  LIGHT_GROUP_TEXT    = 0x3000,
-  LIGHT_GROUP_CIRCLE  = 0x4000,
-  LIGHT_GROUP_LIPS    = 0x5000,
-  LIGHT_GROUP_EYES    = 0x6000,
-  LIGHT_GROUP_BULBS   = 0x7000,
+  LIGHT_NODE_COMMAND_NONE        = 0,    // no real action here...
+  LIGHT_NODE_COMMAND_STATUS,             // return unit status...
+  LIGHT_NODE_COMMAND_SET_LIGHT,          //
+  LIGHT_NODE_COMMAND_ADJ_LIGHT,          //
+  LIGHT_NODE_COMMAND_LIGHT_OFF,          //
+};
 
-  LIGHT_GROUP_ALL     = 0xF000,
+enum
+{
+  LIGHT_GROUP_NONE    = 0,
+  LIGHT_GROUP_STRANDS = 1,
+  LIGHT_GROUP_LIPS    = 2,
+  LIGHT_GROUP_EYES    = 3,
+  LIGHT_GROUP_TEXT0   = 4,
+  LIGHT_GROUP_TEXT0   = 5,
+  LIGHT_GROUP_BULBS   = 6,
+
+  LIGHT_GROUP_ALL     = 0xff,
 };
 
 enum
