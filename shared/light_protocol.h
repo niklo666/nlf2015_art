@@ -1,10 +1,11 @@
 /*
   shared include file for definition of the communication between light and main node...
+
+  the light protocol needs to be placed in the arduino sketch path in order for it to work
+  the light_protocol.h in here is just a placeholder and wrapper...
 */
 
-#ifndef LIGHT_PROTOCOL_H
-#define LIGHT_PROTOCOL_H
+#include "../src/light_node/light_protocol.h"
 
-// todo: move protocol definitions in light node .ino here...
-
-#endif // LIGHT_PROTOCOL_H
+// no declarations here...
+// at least not anything that is used on the arduino end...

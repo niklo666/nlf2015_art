@@ -6,10 +6,13 @@
 #include <QueueList.h>
 // todo: use fastled...
 // todo: remove dotstar...
-#include <Adafruit_NeoPixel.h>
-#include <Adafruit_DotStar.h>
+//#include <Adafruit_NeoPixel.h>
+//#include <Adafruit_DotStar.h>
+#include "FastLED.h"
+// below doesn't work but has been taken care of...
+//#include "../../shared/light_protocol.h"
+#include "light_protocol.h"
 
-// todo: update to use shared protocol definition include file(s)...
 
 /*
   todo: update light "areas" and behaviours...
@@ -103,49 +106,6 @@ void loop()
 }
 
 
-//************************
-// Communication stuff...
-//************************
-
-typedef struct
-{
-  uint8_t   command;    // commande code...
-  uint16_t  light;      // light identifier...
-  uint8_t   color[3];   // color rgb data for explicit setting of color...
-  uint8_t   intensity;  // intensity value used for showing color...
-  uint8_t   pattern;    // pattern...
-  uint8_t   palette;    // palette used together with pattern...
-  uint16_t  time;       //
-}cmd_message_t;
-
-enum
-{
-  CMD_NONE        = 0,    //
-  CMD_STATUS,             //
-  CMD_SET_LIGHT,          //
-  CMD_ADJ_LIGHT,          //
-};
-
-enum
-{
-  LIGHT_GROUP_NONE    = 0x0000,
-  LIGHT_GROUP_FUNNEL  = 0x1000,
-  LIGHT_GROUP_STRANDS = 0x2000,
-  LIGHT_GROUP_TEXT    = 0x3000,
-  LIGHT_GROUP_CIRCLE  = 0x4000,
-  LIGHT_GROUP_LIPS    = 0x5000,
-  LIGHT_GROUP_EYES    = 0x6000,
-  LIGHT_GROUP_BULBS   = 0x7000,
-  
-  LIGHT_GROUP_ALL     = 0xF000,
-};
-
-enum
-{
-  LIGHT_PATTERN_NONE = 0,
-  LIGHT_PATTERN_STATIC,     // used for all but strands!?
-  LIGHT_PATTERN_FLICKER,    // only used for strands...
-}
 
 
 QueueList<uint8_t>        g_incoming_buffer;          // queue of bytes before assembly...

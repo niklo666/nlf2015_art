@@ -50,7 +50,7 @@ void loop()
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(5000);
+  delay(1000);
 
   myfill(CRGB::Blue);
   FastLED.show();
@@ -63,7 +63,7 @@ void loop()
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(5000);
+  delay(1000);
   
   // Turn the LED on, then pause
   myfill(CRGB::Green);
@@ -77,7 +77,7 @@ void loop()
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(5000);
+  delay(1000);
 
 
   // Turn the LED on, then pause
@@ -92,7 +92,7 @@ void loop()
   FastLED.show();
   digitalWrite(ledPin, LOW);
   Serial.print("all black\r\n");
-  delay(5000);
+  delay(1000);
   
 }
 
