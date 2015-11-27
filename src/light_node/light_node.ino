@@ -15,67 +15,93 @@
 
 
 /*
-  todo: update light "areas" and behaviours...
   light areas and their behaviours (normal):
-  - strands, patterns and palettes also variable intensity...
-  - text, static color and patterns (worms or point with afterglow) with static intensity
+  - strands, patterns and palettes also variable in intensity...
+  - text, static color with variable intensity
   - circle ambient, static color variable intensity...
-  - lips, static color variable intensity...
-  - eyes, static color variable intensity...
+  - lips, static color with variable intensity...
+  - eyes, static color with variable intensity...
   - mains, no color control but dimmable...
 
-  todo: update to handle scenarios and complex workings...
-  this stuff should reside in main controller. the light controller only do "simple" stuff...
+  this stuff (scenarios) should reside in main controller. the light controller only do "simple" stuff...
   the only advanced stuff is handling of (slow) dimming and flickering effects...
 
   light node
   lighting behaviour needed/wanted:
   - "static" color, used for dna strand, only subject to dimming and possibly "living" colors i.e. glimmering effect using random colors from palette
-  - "static" color, used for strands, possibly more vivid than dna otherwise same or similar
-  - "static" colors, used for mouths and eyes, probably only dimming with one static color per item
-
-  communication could be by CAN as it can handle distance and is quite resistant to disturbances *AND* is bidirectional.
-  but we will probably go for ttl usart as it is short haul between main controller and light controller!!
-
-  possibly separate applications distributed over several nodes for differens areas.
-  in that case a lib should be developed and used.
-  a big issue is the not very user-friendlyness of the arduino ide in that you cannot:
-  - have several source files
-  - cannot easily compile from commandline
-  - no real control of library versions etc.
+  - "static" colors, used for mouths and eyes AND TEXT!?, probably only dimming with one static color per item
 
   example and ideas of commands:
-  - set light source color/intensity individual, group, all...
-  - adjust light source intensity individual, group, all...
-  - activate "pattern"/behaviour on (indivdual), group, (all) e.g. "flickering", "randomness"
+  - set light source color/intensity for group...
+  - adjust light source intensity for group, all?
+  - activate "pattern"/behaviour on group e.g. "flickering", "randomness"
   - all off...
 
   todo: update pin mapping:
-  TBD   light channel 0 clock
-  TBD   light channel 0 data
-  TBD   light channel 1 clock
-  TBD   light channel 1 data
-  TBD   light channel 2 clock
-  TBD   light channel 2 data
-  TBD   light channel 3 clock
-  TBD   light channel 3 data
-  TBD   light channel 4 clock
-  TBD   light channel 4 data
-  TBD   mains zero detect
-  TBD   mains dimmer control 0
-  TBD   mains dimmer control 1
-  TBD   i2c sda
-  TBD   i2c scl
+  3   light channel 0 clock
+  2   light channel 0 data
+  5   light channel 1 clock
+  4   light channel 1 data
+  7   light channel 2 clock
+  6   light channel 2 data
+  9   light channel 3 clock
+  8   light channel 3 data
+  11  light channel 4 clock
+  10  light channel 4 data
+  13  light channel 5 clock
+  12  light channel 5 data
+  TBD mains zero detect
+  TBD mains dimmer control 0
+  TBD mains dimmer control 1
+  TBD mains dimmer control 2
+  TBD i2c sda
+  TBD i2c scl
 
 */
 
+// pin definitions...
+const int activity_led_pin =  13; // the number of the LED pin
+const int light_channel0_clock  = 3;
+const int light_channel0_data   = 4;
+const int light_channel1_clock  = 5;
+const int light_channel1_data   = 4;
+const int light_channel2_clock  = 7;
+const int light_channel2_data   = 6;
+const int light_channel3_clock  = 9;
+const int light_channel3_data   = 8;
+const int light_channel4_clock  = 11;
+const int light_channel4_data   = 10;
+const int light_channel5_clock  = 13;   // todo: possible collision with activity LED...
+const int light_channel5_data   = 12;
+
+
+
+// led data...
+const int strands_number_of_leds = 200;     // for now assume all strands are in serial...
+const int lips_number_of_leds = 150;        // for now assume all three symbols use 50 LEDs and are in serial...
+const int eyes_number_of_leds = 100;        // for now assume both symbols use 50 LEDs and are in serial...
+const int text_group0_number_of_leds = 50;  // one strand to light up "In Lust"...
+const int text_group1_number_of_leds = 50;  // one strand to light up "We Trust"...
+CRGB strand_leds[strands_number_of_leds];   // number of leds in the strands...
+CRGB lips_leds[lips_number_of_leds];   // number of leds in the strands...
+CRGB eyes_leds[eyes_number_of_leds];   // number of leds in the strands...
+CRGB text_group0_leds[text_group0_number_of_leds];   // number of leds in the strands...
+CRGB text_group1_leds[text_group1_number_of_leds];   // number of leds in the strands...
+
 void setup()
 {
-  // todo: init on-board teensy LED to use as activity indicator...
+  // init on-board teensy LED to use as activity indicator...
+  pinMode(activity_led_pin, OUTPUT);
 
-  // todo: init lighting stuff...
-  // - init power control(dimmer) io and see to that power is turned off...
+  // init lighting stuff...
+  // - todo: init mains power control(dimmer) io and see to that power is turned off...
+  // - todo: init camera node power control...
   // - init ws2801 control io and see to that leds are off...
+  FastLED.addLeds<WS2801, light_channel0_data, light_channel0_clock, RGB>(strand_leds, strands_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel1_data, light_channel1_clock, RGB>(lips_leds, lips_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel2_data, light_channel2_clock, RGB>(eyes_leds, eyes_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel3_data, light_channel3_clock, RGB>(text_group0_leds, text_group0_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel4_data, light_channel4_clock, RGB>(text_group1_leds, text_group1_number_of_leds);
 
   // todo: init datastructures...
 
@@ -84,7 +110,8 @@ void setup()
 
   // init rpi communication port...
   // todo: selecty proper serial port speed...
-  Serial1.begin(9600);
+  Serial1.begin(1000000, SERIAL_8N1);
+  attachInterruptVector(IRQ_UART1_STATUS, myfunction);
 }
 
 void communication_handler(void);
@@ -96,6 +123,7 @@ void loop()
   // put your main code here, to run repeatedly:
 
   // todo: react on communication input(s)...
+  // collect command packets...
   communication_handler();
 
   command_handler();
@@ -104,8 +132,6 @@ void loop()
   // todo: update lighting...
   light_handler();
 }
-
-
 
 
 QueueList<uint8_t>        g_incoming_buffer;          // queue of bytes before assembly...
@@ -130,9 +156,10 @@ void communication_handler(void)
     buffer[buffer_counter] = Serial1.read();
   }
 
-  if (buffer_counter < (sizeof(cmd_message_t) - 1))
+  if (buffer_counter < (sizeof(cmd_message_t)))
   {
     // not a full packet...
+    // leave it for next round to handle...
     return;
   }
 

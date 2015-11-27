@@ -5,11 +5,8 @@
   "shared" folder for symmetry.
 */
 
-#include "../src/light_node/light_protocol.h"
-
 #ifndef LIGHT_PROTOCOL_H
 #define LIGHT_PROTOCOL_H
-
 
 //************************
 // Communication stuff...
@@ -17,6 +14,7 @@
 
 typedef struct
 {
+  uint8_t   start_magic;// start magic...
   uint8_t   command;    // commande code...
   uint16_t  light;      // light identifier...
   uint8_t   color[3];   // color rgb data for explicit setting of color...
@@ -24,6 +22,7 @@ typedef struct
   uint8_t   pattern;    // pattern...
   uint8_t   palette;    // palette used together with pattern...
   uint16_t  time;       //
+  uint8_t   stop_magic; // stop magic...
 }cmd_message_t;
 
 enum
