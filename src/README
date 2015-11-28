@@ -1,8 +1,8 @@
 
-camera_node       - RPi software to do camera and image works...
-camera_test_app   - PC (and/or Mac) based software to connect to camera node, used for test and development
-dimmer_node       - optional arduino/teensy software for mains dimming...
+camera_node       - RPi software to do camera and image processing works...
+camera_test_app   - PC (and/or Mac) based software to interctwith camera node, used for test and development
+dimmer_node       - optional arduino/teensy software for mains dimming. most probably implemented in light node...
 light_control_app - PC (and/or Mac) based app to control the main node, used for test, development and maintenance
-light_node        - arduino/teensy software for light control node
+light_node        - arduino/teensy software for light control node most probably also including mains lamp dimming
 light_test_app    - PC (and/or Mac) based application to test light_node software
-main_mode         - RPi software to collect activity data from cams, control scenarios and orchestrate the lights
+main_node         - RPi software to collect activity data from cams, control scenarios and orchestrate the lights
