@@ -89,7 +89,12 @@ CRGB text_group1_leds[text_group1_number_of_leds];   // number of leds in the st
 // communication...
 light_node_cmd_message_t  g_command_buffer;
 uint8_t                   g_command_buffer_valid = 0;
-  
+light_node_resp_message_t g_response_buffer;
+
+
+// system...
+uint32_t g_system_status = 0; // overall system status used to communicate async errors and status changes...
+
 
 void setup()
 {
@@ -116,93 +121,171 @@ void setup()
   Serial1.begin(1000000, SERIAL_8N1);
 }
 
-void communication_handler(void);
-void command_handler(void);
+int communication_handler(void);
+int command_handler()
 void light_handler(void);
+
+
+//**************
+// main loop...
+//**************
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
+  int ret = LIGHT_NODE_STATUS_OK;
+  
+  // handle incoming communication and assemble command messages...
+  ret = communication_handler();
+  if ((ret != LIGHT_NODE_STATUS_OK) || g_command_valid)
+  {
+    // check if we have a valid command...
+    // note: g_valid_command shall never be set in case of any error!!!
+    if (g_command_valid)
+    { 
+      // valid command available...
+      // handle the command...
+      ret = command_handler();
+    }
 
-  // todo: react on communication input(s)...
-  // collect command packets...
-  communication_handler();
-
-  command_handler();
+    ret = response_handler();
+  }
+  
+  // todo: implement...
+  // respnse_handler();
 
   // todo: do autonomous stuff e.g. dimming, contingency/"idle" mode behaviour...
   // todo: update lighting...
   light_handler();
 }
 
-
 // todo: init...
 void communication_init(void)
 {
-//  Serial1.begin();
+  //  Serial1.begin();
 }
 
 //
-void communication_handler(void)
+int communication_handler(void)
 {
+  char c;
   static uint8_t buffer_counter = 0;
-  static uint8_t buffer[2*sizeof(light_node_cmd_message_t)];
-  light_node_cmd_message_t* ptr = 0;
+  static char buffer[2 * sizeof(light_node_cmd_message_t)];
+  char* ptr = NULL;
+  boolean error_flag = false;
+  int return_code = LIGHT_NODE_STATUS_OK;
 
-  // copy to buffer...
+  // copy incoming byte(s) to buffer...
   while ((buffer_counter < sizeof(light_node_cmd_message_t)) && Serial1.available())
   {
+    // read byte...
     buffer[buffer_counter] = Serial1.read();
+
+    // debug: show what we got...
+    Serial.print("rcvd: ");
+    Serial.print(c);
+    Serial.print("\r\n");
+
+    // store in buffer...
+    buffer[buffer_counter] = c;
+
+    // increment counter...
+    buffer_counter++;
   }
 
+  // check if ready...
   if (buffer_counter < (sizeof(light_node_cmd_message_t)))
   {
     // not a full packet...
     // leave it for next round to handle...
-    return;
+    Serial.print("msg not ready yet: ");
+    Serial.print(buffer_counter);
+    Serial.print("\r\n");
+
+    // return...
+    return LIGHT_NODE_STATUS_OK;
   }
 
   // todo: sanity check...
 
-  // todo: try to assemble packet..
-  // todo: if successful, queue...
-  ptr = (light_node_cmd_message_t*)buffer;
-  //g_incoming_command_queue.push(*ptr); // todo: doesn't work...
-  // todo: queue the message...
-  for (int i =0; i< sizeof(light_node_cmd_message_t); i++)
+  // try to "assemble" packet..
+  ptr = (char*)g_command_buffer;
+
+  // copy message to message buffer...
+  for (int i = 0; i < sizeof(light_node_cmd_message_t); i++)
   {
-    g_command_buffer[i] = (*ptr)[i];
+    (*ptr)[i] = buffer[i];
   }
 
-  // todo: sanity check...
+  // sanity checks...
+  if (g_command_buffer.start_magic != LIGHT_NODE_MESSAGE_START_MAGIC)
+  {
+    Serial.print("error: wrong start magic...");
+    error_flag = true;
+    return_code = LIGHT_NODE_STATUS_BAD_START_MAGIC;
+  }
 
-  g_command_buffer_valid = 1;
+  if (g_command_buffer.stop_magic != LIGHT_NODE_MESSAGE_STOP_MAGIC)
+  {
+    Serial.print("error: wrong stop magic...");
+    error_flag = true;
+    return_code = LIGHT_NODE_STATUS_BAD_STOP_MAGIC;
+  }
+
+  // set valid flag accordingly...
+  if (error_flag == true)
+  {
+    g_command_buffer_valid = 0;
+  }
+  else
+  {
+    g_command_buffer_valid = 1;
+  }
+
+  // init the response message...
+  g_response_buffer.start   = LIGHT_NODE_MESSAGE_START_MAGIC;
+  g_response_buffer.command = g_command_buffer.command;
+  g_response_buffer.status  = return_code;
+  g_response_buffer.stop    = LIGHT_NODE_MESSAGE_STOP_MAGIC;
+
+  return return_code;
 }
 
-void command_handler(void)
+
+// handle any availbale commands...
+int command_handler()
 {
-  light_node_resp_message_t response;
-  
+//  light_node_resp_message_t response;
+
+/*
+  // are there any commands?
   if (!g_command_valid)
   {
-    return;
+    return LIGHT_NODE_STATUS_OK;
   }
+*/
 
-  // copy the command code...
-  response.command = g_command_buffer.command;
-  response.start_magic  = LIGHT_NODE_MESSAGE_START_MAGIC;
-  response.stop_magic   = LIGHT_NODE_MESSAGE_STOP_MAGIC;
-  
+  // copy command info to response...
+  //response->command      = g_command_buffer.command;
+  //response->start_magic  = LIGHT_NODE_MESSAGE_START_MAGIC;
+  //response->stop_magic   = LIGHT_NODE_MESSAGE_STOP_MAGIC;
+
+  // handle the commmand...
   switch (g_command_buffer.command)
   {
     // todo: implement commands...
     case LIGHT_NODE_COMMAND_NONE:
       // do nothing but give some response...
-      response.status = 0;
+      response.command_status = LIGHT_NODE_STATUS_OK;
+
+    case LIGHT_NODE_COMMAND_STATUS:
+      response.command_status = LIGHT_NODE_STATUS_OK;
+      // todo: any more parameter to send some overall system status...
 
     default:
-      response.status = ;
+      response.command_status = LIGHT_NODE_STATUS_UNKNOWN_COMMAND;
   }
+
+  return LIGHT_NODE_STATUS_OK;
 }
 
 //
