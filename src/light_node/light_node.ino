@@ -275,15 +275,34 @@ int command_handler()
     // todo: implement commands...
     case LIGHT_NODE_COMMAND_NONE:
       // do nothing but give some response...
-      response.command_status = LIGHT_NODE_STATUS_OK;
+      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      break;
 
     case LIGHT_NODE_COMMAND_STATUS:
-      response.command_status = LIGHT_NODE_STATUS_OK;
-      // todo: any more parameter to send some overall system status...
+      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      break;
 
+    case LIGHT_NODE_COMMAND_SET_LIGHT:
+      // todo: implement...
+      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      break;
+
+    case LIGHT_NODE_COMMAND_ADJ_LIGHT:
+      // todo: implement...
+      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      break;
+
+    case LIGHT_NODE_COMMAND_LIGHT_OFF:
+      // todo: implement...
+      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      break;
+      
     default:
-      response.command_status = LIGHT_NODE_STATUS_UNKNOWN_COMMAND;
+      g_response_buffer.command_status = LIGHT_NODE_STATUS_UNKNOWN_COMMAND;
   }
+
+  // always return system status...
+  g_response_buffer.system_status = g_system_status;
 
   return LIGHT_NODE_STATUS_OK;
 }
