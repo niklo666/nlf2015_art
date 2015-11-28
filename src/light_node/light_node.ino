@@ -250,6 +250,7 @@ int communication_handler(void)
   return return_code;
 }
 
+int set_light_command_handler(void);
 
 // handle any availbale commands...
 int command_handler()
@@ -279,6 +280,7 @@ int command_handler()
       break;
 
     case LIGHT_NODE_COMMAND_STATUS:
+      // really the same as none i.e. do nothing but give some response...
       g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
       break;
 
@@ -306,6 +308,66 @@ int command_handler()
 
   return LIGHT_NODE_STATUS_OK;
 }
+
+void color_fill(CRGB* leds, CRGB color, int num)
+{
+  for (int i = 0; i < num; i++)
+  {
+    (*leds)[i] = color;
+  }  
+}
+
+int set_light_command_handler(void)
+{
+  int return_code = LIGHT_NODE_STATUS_OK;
+  
+  // todo: implement...
+  switch (g_command_buffer.light)
+  {
+    case LIGHT_GROUP_NONE:
+      // do nothing...
+      break;
+
+    case LIGHT_GROUP_STRANDS:
+      // todo: some kind of pattern...
+      break;
+
+    case LIGHT_GROUP_LIPS:
+      // support only static color...
+      //color_fill(...) 
+      break;
+      
+    case LIGHT_GROUP_EYES:
+      break;
+      
+    case LIGHT_GROUP_TEXT0:
+      break;
+      
+    case LIGHT_GROUP_TEXT1:
+      break;
+      
+    case LIGHT_GROUP_BULBS:
+      break;
+
+    default:
+      return_code = LIGHT_NODE_STATUS_UNKNOWN_LIGHT;
+  }
+  
+  return return_code;
+}
+
+int adjust_light_command_handler(void)
+{
+  // todo: implement...
+  return LIGHT_NODE_STATUS_OK;
+}
+
+int light_off_command_handler(void)
+{
+  // todo: implement...
+  return LIGHT_NODE_STATUS_OK;
+}
+
 
 //
 //
