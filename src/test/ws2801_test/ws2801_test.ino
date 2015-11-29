@@ -20,7 +20,14 @@ void setup()
   pinMode(ledPin, OUTPUT);
   Serial.begin(9600);
   Serial1.begin(1000000);
-  FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+
+  // run all channels at once...
+  FastLED.addLeds<WS2801, 2, 3, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2801, 4, 5, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2801, 6, 7, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2801, 8, 9, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2801, 10, 11, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2801, 12, 13, RGB>(leds, NUM_LEDS);
 }
 
 void myfill(CRGB color)
@@ -34,8 +41,6 @@ void myfill(CRGB color)
 // test routine to at least test all individual LEDs...
 void loop() 
 {
-  static uint8_t ledstate = LOW;
-
   Serial1.print("hello");
 
   // Turn the LED on, then pause

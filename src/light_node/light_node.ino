@@ -62,7 +62,7 @@
 // pin definitions...
 const int activity_led_pin      = 13; // the number of the LED pin
 const int light_channel0_clock  = 3;
-const int light_channel0_data   = 4;
+const int light_channel0_data   = 2;
 const int light_channel1_clock  = 5;
 const int light_channel1_data   = 4;
 const int light_channel2_clock  = 7;
