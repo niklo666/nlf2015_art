@@ -70,6 +70,7 @@ while True:
   		text = "Occupied"
 */
 #include <iostream>
+#include <unistd.h>
 
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgcodecs.hpp"

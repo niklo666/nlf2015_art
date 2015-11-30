@@ -79,6 +79,6 @@ enum
   LIGHT_PATTERN_NONE = 0,
   LIGHT_PATTERN_STATIC,     // used for all but strands!?
   LIGHT_PATTERN_FLICKER,    // only used for strands...
-}
+};
 
 #endif // LIGHT_PROTOCOL_H
