@@ -17,7 +17,7 @@ CRGB leds_channel5[num_leds_channel5];
 void setup() 
 {
   Serial.begin(9600);     // opens serial port, sets data rate to 9600 bps
-  Serial1.begin(115200);     // opens serial port, sets data rate to 9600 bps
+  //Serial1.begin(115200);     // opens serial port, sets data rate to 9600 bps
 
   FastLED.addLeds<WS2801, 2, 3,   RGB>(leds_channel0, num_leds_channel0);
   FastLED.addLeds<WS2801, 4, 5,   RGB>(leds_channel1, num_leds_channel1);
@@ -36,27 +36,27 @@ void loop()
 {
   char incomingByte;
   
-  if (Serial1.available() > 0) 
+  if (Serial.available() > 0) 
   {
     // read the incoming byte:
-    incomingByte = Serial1.read();
+    incomingByte = Serial.read();
 
     // check for \r and/or \n...
     if (incomingByte == '\r')  // handle windows...
     {
       // do nothing...
     }
-    else if (incomingByte == '\n')  // 
+    else if (incomingByte == '\n')  // take care of the actual new line...
     {
       // todo: check for overflow...
       buffer[buffer_counter++] = '0';
       Serial.print("I received: ");
       Serial.print(buffer);
-      Serial1.print("I received: ");
-      Serial1.print(buffer);
 
       command_handler(buffer, buffer_counter);
-      
+
+      // reset and start over...
+      buffer_counter = 0;
     }
     else
     {
@@ -67,9 +67,6 @@ void loop()
     // say what you got:
     Serial.print("I received: ");
     Serial.print(incomingByte);
-    Serial1.print("I received: ");
-    String s = incomingByte;
-    Serial1.print(s);
    }
 }
 
@@ -116,22 +113,46 @@ void command_handler(char* buffer, int size)
     token = strtok(NULL, " ,");
     blue = atoi(token);
 
+    Serial.print("group: ");
+    Serial.print(group);
+    Serial.print("\r\n");
+    
+    Serial.print("red: ");
+    Serial.print(red);
+    Serial.print("\r\n");
+    
+    Serial.print("green: ");
+    Serial.print(green);
+    Serial.print("\r\n");
+    
+    Serial.print("blue: ");
+    Serial.print(blue);
+    Serial.print("\r\n");
+
     // todo: sanity check...
+
+    // create CRGB...
     CRGB color;
     color.r = red;
     color.g = green;
     color.b = blue;
+
+    // todo: update to handle all (at least the used ones) channels...
     fill_solid(leds_channel0, num_leds_channel0, color);
-    
+    FastLED.show();
   }
   else if (!strcmp("help", token))
   {
     Serial.print("usage:\r\n");
-    Serial.print("set color <group> <r>,<g>,<b>");
+    Serial.print("set color <group> <r>,<g>,<b>\r\n");
+    Serial.print("<group> - group id 0-5\r\n");
+    Serial.print("<r>,<g>,<b> - red, green, blue color values 0-255\r\n");
   }
   else
   {
     Serial.print("unknown input: ");
     Serial.print(token);
+    Serial.print("\r\n");
   }
 }
+
