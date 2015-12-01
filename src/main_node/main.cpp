@@ -161,6 +161,9 @@ int main(int argc, char* argv[])
       return ret;
     }
 
+    // todo: turn on power to the camera nodes or do from script!?
+    // or maybe camera nodes and/or camera node apps are started/controlled by script!?
+
     // todo: connect to the camera nodes...
     ret = main_connect_to_cameras();
     if (ret)
@@ -178,14 +181,35 @@ int main(int argc, char* argv[])
     }
 
     // todo: open serial port to light controller and check connection...
+    ret = main_open_light_node_serial_port("/dev/ttyAMA0");
+    if (ret)
+    {
+      return ret;
+    }
+
+    // todo: check light node status...
+
 
     // enter application loop...
     while (1)
     {
       // todo:
       // - once a second poll all cameras for data...
-      // - convert the occupancie data to light behaviour
-    }
+      // - convert the occupancy data to light behaviour...
+      // e.g. accumulate diff in occupancy to control dim levels and enter modes...
+      // - send updates to the light node...
+
+      // todo: need to break down behaviour:
+      // intro  - run a "show" as startup
+      // normal - react on movement/occupancy up to a certain level by dim up of lights (strands and globes)...
+      // ilwt   - at a certain threshold (movement/occupancy or time) enter a mode where_
+      //   * the lips are dimmed up
+      //   * the text is lit/flashed...
+      //   * globes are dimmed down to accentuate...
+      // voyeur - on movement on the rear dim up the eyes...
+      // outro  - run a "show" at closing down...
+
+     }
 
 
 
@@ -370,7 +394,6 @@ int main_config_cameras(void)
 
   // todo: get all configuration parameters...
   // todo: send all configurations...
-  // idea: create a single set for all config parameters...
 
   return 0;
 }
