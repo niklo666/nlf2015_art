@@ -8,6 +8,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <unistd.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/types.h>

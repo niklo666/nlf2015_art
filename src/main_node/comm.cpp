@@ -10,6 +10,10 @@
   - status inquiries...
 */
 
+#include <stdint.h>
+#include <inttypes.h>
+#include <unistd.h>
+
 //#include "../../shared/camera_protocol.h"
 #include "../../shared/camera_protocol.h"
 #include "comm.h"

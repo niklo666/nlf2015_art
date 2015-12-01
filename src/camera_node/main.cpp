@@ -183,6 +183,7 @@ int main(int argc, char* argv[])
 
   while (1)
   {
+    // handle incoming client requests...
     newsockfd = client_handler(sockfd, &cli_addr);
     if (newsockfd < 0)
     {
@@ -192,15 +193,21 @@ int main(int argc, char* argv[])
 
     while (1)
     {
+      // handle incoming commands...
+      // no reason to support more than one client at the moment...
       ret = command_handler(newsockfd);
       if (ret != 0)
       {
-        // todo: handle error...
+        // todo: handle any errors...
+        // decide what to do:
+        // - log/print...
+        // - restart/die/whatever...
         break;
       }
     }
   }
 
+  // if we end up here it´s the end for the application!!!
   return 0;
 }
 
@@ -229,13 +236,15 @@ int client_handler(int sockfd, struct sockaddr_in* cli_addr)
 
 int command_handler(int newsockfd)
 {
+
+  int ret;
   char buffer[256];
   int n;
   camera_set_parameters_header_t* param_hdr;
   camera_data_t* data;
 
   // todo: wait for and process commands...
-  bzero(buffer,256);
+  bzero(buffer, 256);
   n = read(newsockfd, buffer, 255);
   if (n < 0)
   {
@@ -244,10 +253,12 @@ int command_handler(int newsockfd)
     // todo: handle error...
   }
 
-  // todo: process command...
+  // todo: check that we have enough to make a command!
+
+  // process the command...
   camera_command_comm_header_t* hdr = (camera_command_comm_header_t*)buffer;
   camera_response_header_t* resp = (camera_response_header_t*)buffer;
-  int ret = 0;
+
   switch (hdr->cmd)
   {
     case CAMERA_COMMAND_NONE:
@@ -259,7 +270,10 @@ int command_handler(int newsockfd)
     case CAMERA_COMMAND_GET_CAM_DATA:
       // todo: implement...
       // todo: test...
-      data = (camera_data_t*)&buffer[sizeof(camera_command_comm_header_t)];
+
+      // get the camera_data_t header
+      // todo: sanity check and does the header fit in the data received!?
+      data = (camera_data_t*)(buffer + sizeof(camera_command_comm_header_t));
       ret = camera_get_data(data);
       resp->status = ret;
       if (ret == CAM_NODE_RESP_STATUS_OK)
@@ -283,7 +297,7 @@ int command_handler(int newsockfd)
     case CAMERA_COMMAND_SET_PARAMETER:
       // todo: implement...
       // todo: test...
-      param_hdr = (camera_set_parameters_header_t*)&buffer[sizeof(camera_command_comm_header_t)];
+      param_hdr = (camera_set_parameters_header_t*)(buffer + sizeof(camera_command_comm_header_t));
       ret = camera_set_parameter(param_hdr->parameter_id, param_hdr->value);
       resp->status = ret;
       resp->size = 0;
