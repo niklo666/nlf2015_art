@@ -37,7 +37,9 @@ enum
   CAMERA_COMMAND_GET_CAM_IMAGE, // sync acquire image, encode and send...
   CAMERA_COMMAND_STATUS,        // camera node status...
   CAMERA_COMMAND_SET_PARAMETER, // possibility to set new parameters (or always do before start!?)
+  CAMERA_COMMAND_SET_PARAMETERS,// set ALL parameters...
   CAMERA_COMMAND_GET_PARAMETER, // possibility to set new parameters (or always do before start!?)
+
 };
 
 enum
@@ -65,11 +67,16 @@ enum
   CAMERA_PARAMETER_ACCUMULATE_ALPHA_SLOW, // slow adapting to react on non-moving occupancy...
 
   // threshold...
-  CAMERA_PARAMETER_THRESHOLD,
-  CAMERA_PARAMETER_THRESHOLD_MAX,
+  CAMERA_PARAMETER_THRESHOLD_FAST,
+  CAMERA_PARAMETER_THRESHOLD_SLOW,
+
+  CAMERA_PARAMETER_THRESHOLD_MAX, //
 
   // contours...
-  CAMERA_PARAMETER_MIN_CONTOUR_AREA,
+  CAMERA_PARAMETER_MIN_CONTOUR_AREA_FAST,
+  CAMERA_PARAMETER_MIN_CONTOUR_AREA_SLOW,
+  CAMERA_PARAMETER_MAX_CONTOURS_FAST,
+  CAMERA_PARAMETER_MAX_CONTOURS_SLOW,
 
   //...
 };
@@ -93,8 +100,19 @@ typedef struct
 {
   uint8_t parameter_id;
   double  value;
-}camera_set_parameters_header_t;
+}camera_set_parameter_header_t;
 
+typedef struct
+{
+  double alpha_fast;
+  double alpha_slow;
+  double threshol_fast;
+  double threshol_slow;
+  double min_contour_area_fast;
+  double min_contour_area_slow;
+  double max_contours_fast;
+  double max_contours_slow;
+}camera_set_parameters_header_t;
 
 // todo: add enum for parameters...
 

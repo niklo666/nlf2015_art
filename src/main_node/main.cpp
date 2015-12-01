@@ -6,6 +6,7 @@
  * sleeps 20 seconds and terminates afterwards.
  */
 
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -18,11 +19,14 @@
 #include <syslog.h>
 #include <pthread.h>
 
-#include "sync.h"
+
+//#include "sync.h"
 #include "comm.h"
 #include "light.h"
-#include "monitor.h"
+//#include "monitor.h"
+#include "config.h"
 
+using namespace std;
 
 //
 pthread_t main_tid = 0;
@@ -107,13 +111,22 @@ void* main_thread(void *p);
 
 void signal_handler(int signo);
 
-int main()
+int g_cam1_socket = -1;
+int g_cam2_socket = -1;
+int g_cam3_socket = -1;
+
+int main_connect_to_cameras(void);
+int main_load_configuration(char* config_file);
+int main_config_cameras(void);
+
+int main(int argc, char* argv[])
 {
   int err;
+  int ret;
 
     // todo: include the daemon stuff...
     // call the skeletal standard daemon code...
-    skeleton_daemon();
+    //skeleton_daemon();
 
     // todo: replace example code...
     // - open config file for settings like start mode etc etc etc...
@@ -124,7 +137,7 @@ int main()
     // - start new thread and open socket and listen for commands...
     // - start another new thread that:
     // - open serial port and talk to the teensy light controller...
-    // - depending on mode connect to configured camera ip/ports...
+    // - depending on mode conn ect to configured camera ip/ports...
     // - periodially polls cameras for activity...
     // - starts a third thread that monitors the system e.g. system temp...
     //
@@ -134,6 +147,49 @@ int main()
     //  * call light node to possibly update colors and/or intensities...
     // - use one thread for allowing direct commands from ethernet...
 
+    //************************
+    // the simple solution...
+    //************************
+
+    // init syslog...
+    openlog("main_node", LOG_PID, LOG_DAEMON);
+
+    // load configurations...
+    ret = main_load_configuration(argv[1]);
+    if (ret)
+    {
+      return ret;
+    }
+
+    // todo: connect to the camera nodes...
+    ret = main_connect_to_cameras();
+    if (ret)
+    {
+      return ret;
+    }
+
+    // todo: config the camera nodes...
+    // - get all config parameters...
+    // - send them to the nodes...
+    ret = main_config_cameras();
+    if (ret)
+    {
+      return ret;
+    }
+
+    // todo: open serial port to light controller and check connection...
+
+    // enter application loop...
+    while (1)
+    {
+      // todo:
+      // - once a second poll all cameras for data...
+      // - convert the occupancie data to light behaviour
+    }
+
+
+
+/*
     // todo: get configurations...
 
     // todo: no loop when using threads....
@@ -177,6 +233,7 @@ int main()
     closelog();
 
     return EXIT_SUCCESS;
+*/
 }
 
 enum
@@ -241,4 +298,79 @@ void signal_handler(int signo)
 
   }
 
+}
+
+
+int main_connect_to_cameras(void)
+{
+  char cam1_ip[16];
+  char cam2_ip[16];
+  char cam3_ip[16];
+  int cam1_port;
+  int cam2_port;
+  int cam3_port;
+
+  config_get_string_value("cam1_ip", cam1_ip);
+  config_get_string_value("cam2_ip", cam2_ip);
+  config_get_string_value("cam3_ip", cam3_ip);
+  config_get_int_value("cam1_port", &cam1_port);
+  config_get_int_value("cam2_port", &cam2_port);
+  config_get_int_value("cam3_port", &cam3_port);
+
+  g_cam1_socket = comm_connect(cam1_ip, cam1_port);
+  if (cam1_socket == -1)
+  {
+    cerr << "error: failed to connect to camera 1\n";
+    return -1;
+  }
+
+  g_cam2_socket = comm_connect(cam2_ip, cam2_port);
+  if (cam2_socket == -1)
+  {
+    cerr << "error: failed to connect to camera 2\n";
+    return -1;
+  }
+
+  g_cam3_socket = comm_connect(cam3_ip, cam3_port);
+  if (cam3_socket == -1)
+  {
+    cerr << "error: failed to connect to camera 3\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int main_load_configuration(char* config_file)
+{
+  int ret;
+
+  if (config_file != NULL)
+  {
+    ret = config_read(config_file);
+  }
+  else
+  {
+    // default config file...
+    ret = config_read("config.txt");
+  }
+
+  if (ret)
+  {
+    cerr << "error: failed to read config. exiting...";
+    return -1;
+  }
+
+  return 0;
+}
+
+int main_config_cameras(void)
+{
+  int ret;
+
+  // todo: get all configuration parameters...
+  // todo: send all configurations...
+  // idea: create a single set for all config parameters...
+
+  return 0;
 }

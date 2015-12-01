@@ -243,6 +243,7 @@ int camera_get_data(camera_data_t* data)
     }
   }
 
+  // for now use a single slot...
   data->slot_count_slow[0] = contour_counter_slow;
   data->slot_count_slow[0] = contour_counter_fast;
 

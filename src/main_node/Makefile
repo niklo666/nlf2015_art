@@ -15,12 +15,12 @@ LFLAGS =
 #LIBS = -lmylib -lm
 LIBS = -lpthread
 
-SRCS = main.cpp light.cpp comm.cpp sync.cpp monitor.cpp
+SRCS = main.cpp light.cpp comm.cpp config.cpp
 
-MAIN = main_node_app
+MAIN = main_node
 
 # the build target executable:
-TARGET = main_node_app
+TARGET = main_node
 
 OBJS = $(SRCS:.cpp=.o)
 

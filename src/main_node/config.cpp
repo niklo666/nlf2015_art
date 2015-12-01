@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "config.h"
+
 
 #define MAXBUF 1024
 #define DELIM "="
@@ -60,6 +62,65 @@ int config_read(char* config_file)
 
   return 0;
 }
+
+int config_get_string_value(char* key, char* value)
+{
+  int index = 0;
+
+  index = config_find_key(key);
+  if (index == -1)
+  {
+    return -1;
+  }
+
+  strcpy(value, g_config_items[index].value);
+
+  return 0;
+}
+
+int config_get_int_value(char* key, int* value)
+{
+  int index = 0;
+
+  index = config_find_key(key);
+  if (index == -1)
+  {
+    return -1;
+  }
+
+  *value = atoi(g_config_items[index].value);
+
+  return 0;
+}
+
+int config_get_double_value(char* key, double* value)
+{
+  int index = 0;
+
+  index = config_find_key(key);
+  if (index == -1)
+  {
+    return -1;
+  }
+
+  *value = atof(g_config_items[index].value);
+
+  return 0;
+}
+
+int config_find_key(char* key)
+{
+  for (int i = 0; i < g_config_item_counter; i++)
+  {
+      if (!strcmp(key, g_config_items[i].value))
+      {
+        return i;
+      }
+  }
+
+  return -1;
+}
+
 
 void config_dump(void)
 {
