@@ -47,6 +47,8 @@ enum
 
   // command related...
   LIGHT_NODE_STATUS_UNKNOWN_COMMAND,
+
+  //
   LIGHT_NODE_STATUS_UNKNOWN_LIGHT,
 
   LIGHT_NODE_STATUS_GENERAL_ERROR = 0xff
@@ -56,20 +58,21 @@ enum
 {
   LIGHT_NODE_COMMAND_NONE        = 0,    // no real action here...
   LIGHT_NODE_COMMAND_STATUS,             // return unit status...
-  LIGHT_NODE_COMMAND_SET_LIGHT,          //
-  LIGHT_NODE_COMMAND_ADJ_LIGHT,          //
-  LIGHT_NODE_COMMAND_LIGHT_OFF,          //
+  LIGHT_NODE_COMMAND_SET_LIGHT,          // set a light color and intensity...
+  LIGHT_NODE_COMMAND_DIM_LIGHT,          // with a given color adjust down at given speed to a max level...
+  LIGHT_NODE_COMMAND_BRIGHTEN_LIGHT,     // with a given color adjust up/down at given speed to a max level...
+  LIGHT_NODE_COMMAND_LIGHT_OFF,          // turn off light
 };
 
 enum
 {
   LIGHT_GROUP_NONE    = 0,
-  LIGHT_GROUP_STRANDS = 1,
-  LIGHT_GROUP_LIPS    = 2,
-  LIGHT_GROUP_EYES    = 3,
+  LIGHT_GROUP_STRANDS   = 1,  // both sections should do the same...
+  LIGHT_GROUP_EYES    = 2,
+  LIGHT_GROUP_LIPS    = 3,
   LIGHT_GROUP_TEXT0   = 4,
   LIGHT_GROUP_TEXT1   = 5,
-  LIGHT_GROUP_BULBS   = 6,
+  LIGHT_GROUP_BULBS   = 6,  // 
 
   LIGHT_GROUP_ALL     = 0xff,
 };

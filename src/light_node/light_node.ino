@@ -4,11 +4,8 @@
 
 #include <SPI.h>
 #include <QueueList.h>
-// todo: use fastled...
-// todo: remove dotstar...
-//#include <Adafruit_NeoPixel.h>
-//#include <Adafruit_DotStar.h>
 #include "FastLED.h"
+#include <elapsedMillis.h>
 // below doesn't work but has been taken care of...
 //#include "../../shared/light_protocol.h"
 #include "light_protocol.h"
@@ -37,31 +34,46 @@
   - activate "pattern"/behaviour on group e.g. "flickering", "randomness"
   - all off...
 
-  todo: update pin mapping:
-  3   light channel 0 clock
-  2   light channel 0 data
+  update pin mapping:
+  2   light channel 0 data    - strands front i.e. lips
+  3   light channel 0 clock   
+  4   light channel 1 data    - strands rear i.e. eyes
   5   light channel 1 clock
-  4   light channel 1 data
+  6   light channel 2 data    - eyes 
   7   light channel 2 clock
-  6   light channel 2 data
+  8   light channel 3 data    - lips
   9   light channel 3 clock
-  8   light channel 3 data
+  10  light channel 4 data    - text0 "IN LUST"
   11  light channel 4 clock
-  10  light channel 4 data
+  12  light channel 5 data    - text1 "WE TRUST"
   13  light channel 5 clock
-  12  light channel 5 data
-  TBD mains zero detect
-  TBD mains dimmer control 0
-  TBD mains dimmer control 1
-  TBD mains dimmer control 2
+  
+  TBD dimmer control          - control of relay to maneuver a regular button dimmer...
   TBD i2c sda
   TBD i2c scl
 
 */
 
+enum
+{
+  LIGHT_SOURCE_STATUS_NORMAL    = 0,
+  LIGHT_SOURCE_STATUS_DIM       = 0,
+  LIGHT_SOURCE_STATUS_BRIGHTEN  = 0,
+};
+
+typedef struct
+{
+  int     status;       // 
+  uint8_t speed;        // dim/brighten speed in steps per 100ms...
+  uint8_t start_value;  
+  uint8_t max_value; 
+}light_source_behaviour_t;
+
+
 // pin definitions...
 const int activity_led_pin      = 13; // the number of the LED pin
-const int light_channel0_clock  = 3;
+
+const int light_channel0_clock  = 3; 
 const int light_channel0_data   = 2;
 const int light_channel1_clock  = 5;
 const int light_channel1_data   = 4;
@@ -75,28 +87,42 @@ const int light_channel5_clock  = 13;   // todo: possible collision with activit
 const int light_channel5_data   = 12;
 
 // led data...
-const int strands_number_of_leds = 200;     // for now assume all strands are in serial...
-const int lips_number_of_leds = 150;        // for now assume all three symbols use 50 LEDs and are in serial...
-const int eyes_number_of_leds = 100;        // for now assume both symbols use 50 LEDs and are in serial...
-const int text_group0_number_of_leds = 50;  // one strand to light up "In Lust"...
-const int text_group1_number_of_leds = 50;  // one strand to light up "We Trust"...
-CRGB strand_leds[strands_number_of_leds];   // number of leds in the strands...
-CRGB lips_leds[lips_number_of_leds];   // number of leds in the strands...
-CRGB eyes_leds[eyes_number_of_leds];   // number of leds in the strands...
-CRGB text_group0_leds[text_group0_number_of_leds];   // number of leds in the strands...
-CRGB text_group1_leds[text_group1_number_of_leds];   // number of leds in the strands...
+const int strands_front_number_of_leds  = 100;      // split in half...
+const int strands_rear_number_of_leds   = 100;      // split in half...
+const int eyes_number_of_leds           = 100;      // for now assume both symbols use 50 LEDs and are in serial...
+const int lips_number_of_leds           = 150;      // for now assume all three symbols use 50 LEDs and are in serial...
+const int text0_number_of_leds          = 50;       // one strand to light up "In Lust"...
+const int text1_number_of_leds          = 50;       // one strand to light up "We Trust"...
+CRGB front_strand_leds[strands_front_number_of_leds];           // number of leds in the strands...
+CRGB rear_strand_leds[strands_rear_number_of_leds];           // number of leds in the strands...
+CRGB eyes_leds[eyes_number_of_leds];                // number of leds in the strands...
+CRGB lips_leds[lips_number_of_leds];                // number of leds in the strands...
+CRGB text0_leds[text0_number_of_leds];              // number of leds in the strands...
+CRGB text1_leds[text1_number_of_leds];              // number of leds in the strands...
 
-// communication...
+light_source_behaviour_t strands_behaviour = {0,0,0,0};
+light_source_behaviour_t eyes_behaviour = {0,0,0,0};
+light_source_behaviour_t lips_behaviour = {0,0,0,0};
+light_source_behaviour_t text0_behaviour = {0,0,0,0};
+light_source_behaviour_t text1_behaviour = {0,0,0,0};
+
+
+// communication data...
 light_node_cmd_message_t  g_command_buffer;
 uint8_t                   g_command_buffer_valid = 0;
 light_node_resp_message_t g_response_buffer;
 
+// 
+uint8_t g_update_lights  = 0;
 
 // system...
 uint32_t g_system_status = 0; // overall system status used to communicate async errors and status changes...
 
+// for periodic stuff...
+elapsedMillis g_periodic_timer;
 
-void setup()
+
+void setup(void)
 {
   // init on-board teensy LED to use as activity indicator...
   pinMode(activity_led_pin, OUTPUT);
@@ -105,24 +131,29 @@ void setup()
   // - todo: init mains power control(dimmer) io and see to that power is turned off...
   // - todo: init camera node power control...
   // - init ws2801 control io and see to that leds are off...
-  FastLED.addLeds<WS2801, light_channel0_data, light_channel0_clock, RGB>(strand_leds, strands_number_of_leds);
-  FastLED.addLeds<WS2801, light_channel1_data, light_channel1_clock, RGB>(lips_leds, lips_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel0_data, light_channel0_clock, RGB>(front_strand_leds, strands_front_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel1_data, light_channel1_clock, RGB>(rear_strand_leds, strands_rear_number_of_leds);
   FastLED.addLeds<WS2801, light_channel2_data, light_channel2_clock, RGB>(eyes_leds, eyes_number_of_leds);
-  FastLED.addLeds<WS2801, light_channel3_data, light_channel3_clock, RGB>(text_group0_leds, text_group0_number_of_leds);
-  FastLED.addLeds<WS2801, light_channel4_data, light_channel4_clock, RGB>(text_group1_leds, text_group1_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel3_data, light_channel3_clock, RGB>(lips_leds, lips_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel4_data, light_channel4_clock, RGB>(text0_leds, text0_number_of_leds);
+  FastLED.addLeds<WS2801, light_channel5_data, light_channel5_clock, RGB>(text1_leds, text1_number_of_leds);
 
-  // todo: init datastructures...
-
+  // init datastructures...
+  // todo: clear command buffer...
+  // todo: clear reponse buffer...
+  
   // init debug serial port...
   Serial.begin(9600);
 
   // init rpi communication port...
-  // todo: selecty proper serial port speed...
-  Serial1.begin(1000000, SERIAL_8N1);
+  // todo: select proper serial port speed...
+  // trial and error tells that 115200 works ok!
+  Serial1.begin(115200, SERIAL_8N1);
 }
 
 int communication_handler(void);
-int command_handler()
+int command_handler(void);
+int response_handler(void);
 void light_handler(void);
 
 
@@ -132,39 +163,42 @@ void light_handler(void);
 
 void loop()
 {
+  // init status to ok...
   int ret = LIGHT_NODE_STATUS_OK;
   
   // handle incoming communication and assemble command messages...
   ret = communication_handler();
-  if ((ret != LIGHT_NODE_STATUS_OK) || g_command_valid)
+  if ((ret != LIGHT_NODE_STATUS_OK) || g_command_buffer_valid)
   {
     // check if we have a valid command...
     // note: g_valid_command shall never be set in case of any error!!!
-    if (g_command_valid)
+    if (g_command_buffer_valid)
     { 
       // valid command available...
       // handle the command...
       ret = command_handler();
+      if (ret == LIGHT_NODE_STATUS_OK)
+      {
+        // update...
+        g_update_light = 1;
+      }
     }
 
+    // and now send the response...
+    // todo: remember to purge serial port before sending commands from rpi...
     ret = response_handler();
+    if (ret != LIGHT_NODE_STATUS_OK)
+    {
+      // todo: wht to do...
+    }
   }
-  
-  // todo: implement...
-  // respnse_handler();
-
+ 
   // todo: do autonomous stuff e.g. dimming, contingency/"idle" mode behaviour...
   // todo: update lighting...
   light_handler();
 }
 
-// todo: init...
-void communication_init(void)
-{
-  //  Serial1.begin();
-}
-
-//
+// handle any incoming data on serial port...
 int communication_handler(void)
 {
   char c;
@@ -178,7 +212,7 @@ int communication_handler(void)
   while ((buffer_counter < sizeof(light_node_cmd_message_t)) && Serial1.available())
   {
     // read byte...
-    buffer[buffer_counter] = Serial1.read();
+    c = Serial1.read();
 
     // debug: show what we got...
     Serial.print("rcvd: ");
@@ -208,12 +242,12 @@ int communication_handler(void)
   // todo: sanity check...
 
   // try to "assemble" packet..
-  ptr = (char*)g_command_buffer;
+  ptr = (char*)&g_command_buffer;
 
   // copy message to message buffer...
   for (int i = 0; i < sizeof(light_node_cmd_message_t); i++)
   {
-    (*ptr)[i] = buffer[i];
+    ptr[i] = buffer[i];
   }
 
   // sanity checks...
@@ -242,15 +276,18 @@ int communication_handler(void)
   }
 
   // init the response message...
-  g_response_buffer.start   = LIGHT_NODE_MESSAGE_START_MAGIC;
-  g_response_buffer.command = g_command_buffer.command;
-  g_response_buffer.status  = return_code;
-  g_response_buffer.stop    = LIGHT_NODE_MESSAGE_STOP_MAGIC;
+  g_response_buffer.start_magic     = LIGHT_NODE_MESSAGE_START_MAGIC;
+  g_response_buffer.command         = g_command_buffer.command;
+  g_response_buffer.command_status  = return_code;  // in case of success it will possibly be overwritten by any execution statuses...
+  g_response_buffer.stop_magic      = LIGHT_NODE_MESSAGE_STOP_MAGIC;
 
+  // also return the code...
   return return_code;
 }
 
 int set_light_command_handler(void);
+int dim_light_command_handler(void);
+int light_off_command_handler(void);
 
 // handle any availbale commands...
 int command_handler()
@@ -285,18 +322,15 @@ int command_handler()
       break;
 
     case LIGHT_NODE_COMMAND_SET_LIGHT:
-      // todo: implement...
-      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      g_response_buffer.command_status = set_light_command_handler();
       break;
 
-    case LIGHT_NODE_COMMAND_ADJ_LIGHT:
-      // todo: implement...
-      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+    case LIGHT_NODE_COMMAND_DIM_LIGHT:
+      g_response_buffer.command_status = dim_light_command_handler();
       break;
 
     case LIGHT_NODE_COMMAND_LIGHT_OFF:
-      // todo: implement...
-      g_response_buffer.command_status = LIGHT_NODE_STATUS_OK;
+      g_response_buffer.command_status = light_off_command_handler();
       break;
       
     default:
@@ -309,6 +343,21 @@ int command_handler()
   return LIGHT_NODE_STATUS_OK;
 }
 
+int response_handler(void)
+{
+  char* ptr = NULL;
+
+  ptr = (char*)&g_response_buffer;
+
+  for (int i =0; i < sizeof(light_node_resp_message_t); i++)
+  {
+    Serial1.write(*ptr);
+    ptr++;  
+  }
+  
+  return LIGHT_NODE_STATUS_OK;
+}
+
 void color_fill(CRGB* leds, CRGB color, int num)
 {
   for (int i = 0; i < num; i++)
@@ -317,36 +366,72 @@ void color_fill(CRGB* leds, CRGB color, int num)
   }  
 }
 
+void strands_random_fill_from_palette(const CRGBPalette256& palette, uint8_t brightness)
+{   
+    for (int i = 0; i < strands_front_number_of_leds; i++)
+    {
+        front_strand_leds[i]  = ColorFromPalette(palette, random8(), brightness, LINEARBLEND);
+        rear_strand_leds[i]   = ColorFromPalette(palette, random8(), brightness, LINEARBLEND);
+    }
+}
+
+void strands_random_fill_from_rainbow_palette(uint8_t brightness)
+{
+  strands_random_fill_from_palette(RainbowColors_p, brightness);
+}
+
+
 int set_light_command_handler(void)
 {
   int return_code = LIGHT_NODE_STATUS_OK;
+  CRGB color;
+
+  // get color even if we do not use it....
+  color.red   = g_command_buffer.color[0];
+  color.green = g_command_buffer.color[1];
+  color.blue  = g_command_buffer.color[2];  
   
-  // todo: implement...
+  
   switch (g_command_buffer.light)
   {
     case LIGHT_GROUP_NONE:
       // do nothing...
+      return_code = LIGHT_NODE_STATUS_OK;
       break;
 
     case LIGHT_GROUP_STRANDS:
       // todo: some kind of pattern...
+      // random color from rainbow palette at dim level!?
+      switch (g_command_buffer.pattern)
+      {
+          case LIGHT_PATTERN_STATIC:
+          default:
+            color_fill(front_strand_leds, color, strands_front_number_of_leds); 
+            color_fill(rear_strand_leds, color, strands_rear_number_of_leds); 
+            break;
+      }
       break;
 
     case LIGHT_GROUP_LIPS:
       // support only static color...
-      //color_fill(...) 
+      color_fill(lips_leds, color, lips_number_of_leds); 
       break;
       
     case LIGHT_GROUP_EYES:
+      color_fill(eyes_leds, color, eyes_number_of_leds);
       break;
       
     case LIGHT_GROUP_TEXT0:
+      color_fill(text0_leds, color, text0_number_of_leds);
       break;
       
     case LIGHT_GROUP_TEXT1:
+      color_fill(text1_leds, color, text1_number_of_leds);
       break;
       
     case LIGHT_GROUP_BULBS:
+      // todo: implement mains lamp dimming...
+      // use red as intensity...
       break;
 
     default:
@@ -356,7 +441,7 @@ int set_light_command_handler(void)
   return return_code;
 }
 
-int adjust_light_command_handler(void)
+int dim_light_command_handler(void)
 {
   // todo: implement...
   return LIGHT_NODE_STATUS_OK;
@@ -364,6 +449,53 @@ int adjust_light_command_handler(void)
 
 int light_off_command_handler(void)
 {
+  int return_code = LIGHT_NODE_STATUS_OK;
+  
+  switch (g_command_buffer.light)
+  {
+    case LIGHT_GROUP_NONE:
+      // do nothing...
+      return_code = LIGHT_NODE_STATUS_OK;
+      break;
+
+    case LIGHT_GROUP_STRANDS:
+      // todo: some kind of pattern...
+      // random color from rainbow palette at dim level!?
+      switch (g_command_buffer.pattern)
+      {
+          case LIGHT_PATTERN_STATIC:
+          default:
+            color_fill(front_strand_leds, BLACK, strands_front_number_of_leds); 
+            color_fill(rear_strand_leds, BLACK, strands_rear_number_of_leds); 
+            break;
+      }
+      break;
+
+    case LIGHT_GROUP_LIPS:
+      // support only static color...
+      color_fill(lips_leds, BLACK, lips_number_of_leds); 
+      break;
+      
+    case LIGHT_GROUP_EYES:
+      color_fill(eyes_leds, BLACK, eyes_number_of_leds);
+      break;
+      
+    case LIGHT_GROUP_TEXT0:
+      color_fill(text0_leds, BLACK, text0_number_of_leds);
+      break;
+      
+    case LIGHT_GROUP_TEXT1:
+      color_fill(text1_leds, BLACK, text1_number_of_leds);
+      break;
+      
+    case LIGHT_GROUP_BULBS:
+      // todo: implement mains lamp dimming...
+      // use red as intensity...
+      break;
+
+    default:
+      return_code = LIGHT_NODE_STATUS_UNKNOWN_LIGHT;
+  }
   // todo: implement...
   return LIGHT_NODE_STATUS_OK;
 }
@@ -375,6 +507,19 @@ int light_off_command_handler(void)
 void light_handler(void)
 {
   // todo: do autonomous stuff like dimming, patterns etc...
+  if (g_periodic_timer > 100)
+  {
+    // reset...
+    g_periodic_timer = 0;
 
-  // todo: update the actual lights...
+    // todo: 
+  }
+  
+
+  // update the actual lights...
+  if (g_update_lights)
+  {
+    FastLED.show();
+  }
+  
 }
